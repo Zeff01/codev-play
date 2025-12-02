@@ -37,9 +37,9 @@ app.get("/api", (_req: Request, res: Response) => {
   });
 });
 
-// ---------------------------
+// ----------------------------
 //    Socket.io Integration
-// ---------------------------
+// ----------------------------
 
 io.on("connection", (socket) => {
   console.log("A user connected", socket.id);
