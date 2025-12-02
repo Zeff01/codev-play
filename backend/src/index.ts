@@ -1,6 +1,9 @@
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
+import express, { Request, Response } from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+
+import { Server } from "socket.io";
+import http from "http";
 
 dotenv.config();
 
@@ -12,16 +15,16 @@ app.use(cors());
 app.use(express.json());
 
 // Health check endpoint
-app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', message: 'Codev-Play API is running' });
+app.get("/health", (_req: Request, res: Response) => {
+  res.json({ status: "ok", message: "Codev-Play API is running" });
 });
 
 // API routes will be added here
-app.get('/api', (_req: Request, res: Response) => {
+app.get("/api", (_req: Request, res: Response) => {
   res.json({
-    message: 'Welcome to Codev-Play API',
-    version: '1.0.0',
-    games: []
+    message: "Welcome to Codev-Play API",
+    version: "1.0.0",
+    games: [],
   });
 });
 
