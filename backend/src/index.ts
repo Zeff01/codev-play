@@ -1,23 +1,11 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-//test
-import { Server } from "socket.io";
-import http from "http";
-import { pool, connectDB } from './config/db';
+import { pool, connectDB } from "./config/db";
 
 dotenv.config();
 
 const app = express();
-const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-});
-
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -38,46 +26,27 @@ app.get("/api", (_req: Request, res: Response) => {
   });
 });
 
-// ----------------------------
-//    Socket.io Integration
-// ----------------------------
-
-io.on("connection", (socket) => {
-  console.log("A user connected", socket.id);
-
-  // Handle Messages
-  socket.on("chat message", (msg) => {
-    try {
-      console.log("Message received:", msg);
-      io.emit("chat message", msg);
-    } catch (err) {
-      console.error("Error handling chat message:", err);
-    }
-  });
-
-  // Handle Disconnection
-  socket.on("disconnect", () => {
-    console.log("A user disconnected");
-  });
-
-  socket.on("error", (err) => {
-    console.error("Socket Error", err);
-  });
+// Test DB query route
+app.get("/users", async (_req: Request, res: Response) => {
+  try {
+    const results = await pool.query("SELECT * FROM users");
+    res.json(results.rows);
+  } catch (error) {
+    console.error("Query error:", error);
+    res.status(500).json({ error: "Database query failed" });
+  }
 });
 
-server.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
 async function startServer() {
   try {
-    await connectDB(); 
-    console.log('Database connected successfully.');
+    await connectDB();
+    console.log("Database connected successfully.");
 
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
-} catch (error) {
-    console.error('Failed to connect to the database:', error);
+  } catch (error) {
+    console.error("Failed to connect to the database:", error);
     process.exit(1);
   }
 }
