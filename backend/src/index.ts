@@ -4,9 +4,6 @@ import dotenv from "dotenv";
 
 import { Server } from "socket.io";
 import http from "http";
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
 import { pool, connectDB } from './config/db';
 
 dotenv.config();
