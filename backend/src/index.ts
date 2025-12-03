@@ -4,6 +4,10 @@ import dotenv from "dotenv";
 
 import { Server } from "socket.io";
 import http from "http";
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { pool, connectDB } from './config/db';
 
 dotenv.config();
 
@@ -67,3 +71,18 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+async function startServer() {
+  try {
+    await connectDB(); 
+    console.log('Database connected successfully.');
+
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
+} catch (error) {
+    console.error('Failed to connect to the database:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
