@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 import { Server } from "socket.io";
 import http from "http";
-import { pool, connectDB } from './config/db';
+import { pool, connectDB } from "./config/db";
 
 dotenv.config();
 
@@ -36,6 +36,17 @@ app.get("/api", (_req: Request, res: Response) => {
     version: "1.0.0",
     games: [],
   });
+});
+
+// Test DB query route
+app.get("/users", async (_req: Request, res: Response) => {
+  try {
+    const results = await pool.query("SELECT * FROM users");
+    res.json(results.rows);
+  } catch (error) {
+    console.error("Query error:", error);
+    res.status(500).json({ error: "Database query failed" });
+  }
 });
 
 // ----------------------------
@@ -70,14 +81,14 @@ server.listen(PORT, () => {
 });
 async function startServer() {
   try {
-    await connectDB(); 
-    console.log('Database connected successfully.');
+    await connectDB();
+    console.log("Database connected successfully.");
 
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
-} catch (error) {
-    console.error('Failed to connect to the database:', error);
+  } catch (error) {
+    console.error("Failed to connect to the database:", error);
     process.exit(1);
   }
 }
