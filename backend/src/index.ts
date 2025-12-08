@@ -1,13 +1,19 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
+import AppError from "./middleware/AppError";
+
+// Utils
 import cors from "cors";
 import dotenv from "dotenv";
 
+// Servers
 import { Server } from "socket.io";
+import { initializeSocket } from "./config/socket-server";
 import http from "http";
 import { pool, connectDB } from "./config/db";
 
 dotenv.config();
 
+// Constant Variables
 const app = express();
 const server = http.createServer(app);
 
@@ -18,6 +24,7 @@ const io = new Server(server, {
   },
 });
 
+// PORT
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -38,53 +45,39 @@ app.get("/api", (_req: Request, res: Response) => {
   });
 });
 
-// Test DB query route
-app.get("/users", async (_req: Request, res: Response) => {
-  try {
-    const results = await pool.query("SELECT * FROM users");
-    res.json(results.rows);
-  } catch (error) {
-    console.error("Query error:", error);
-    res.status(500).json({ error: "Database query failed" });
+// Socket.io Integration
+initializeSocket(io);
+
+// 404 handler — for unknown routes
+app.use((req: Request, res: Response, next: NextFunction) => {
+  next(new AppError(`Page not found - ${req.originalUrl}`, 404));
+});
+
+// Global Error Handlers
+app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+
+  const response: any = {
+    success: false,
+    message,
+    statusCode,
+  };
+
+  if (process.env.NODE_ENV !== "production") {
+    response.stack = err.stack;
   }
+
+  res.status(statusCode).json(response);
 });
 
-// ----------------------------
-//    Socket.io Integration
-// ----------------------------
-
-io.on("connection", (socket) => {
-  console.log("A user connected", socket.id);
-
-  // Handle Messages
-  socket.on("chat message", (msg) => {
-    try {
-      console.log("Message received:", msg);
-      io.emit("chat message", msg);
-    } catch (err) {
-      console.error("Error handling chat message:", err);
-    }
-  });
-
-  // Handle Disconnection
-  socket.on("disconnect", () => {
-    console.log("A user disconnected");
-  });
-
-  socket.on("error", (err) => {
-    console.error("Socket Error", err);
-  });
-});
-
-server.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Database Server
 async function startServer() {
   try {
     await connectDB();
     console.log("Database connected successfully.");
 
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
   } catch (error) {
