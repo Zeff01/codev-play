@@ -15,7 +15,7 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 ### TASK-F002: Core UI Components
 
 - [x] Create Button component (Shadcn/custom)
-- [ ] Create Card component
+- [x] Create Card component
 - [ ] Create Input component
 - [ ] Create Modal/Dialog component
 - [ ] Create Loading spinner component
