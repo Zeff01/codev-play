@@ -16,7 +16,7 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 
 - [x] Create Button component (Shadcn/custom)
 - [x] Create Card component
-- [ ] Create Input component
+- [x] Create Input component
 - [ ] Create Modal/Dialog component
 - [ ] Create Loading spinner component
 - [ ] Create Toast notification system
