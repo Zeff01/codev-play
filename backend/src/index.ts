@@ -9,7 +9,7 @@ import dotenv from "dotenv";
 import { Server } from "socket.io";
 import { initializeSocket } from "./config/socket-server";
 import http from "http";
-import { pool, connectDB } from './config/db';
+import { pool, connectDB } from "./config/db";
 
 dotenv.config();
 
