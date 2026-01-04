@@ -19,7 +19,7 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 - [x] Create Input component
 - [x] Create Modal/Dialog component
 - [x] Create Loading spinner component
-- [ ] Create Toast notification system
+- [x] Create Toast notification system
 
 ### TASK-F003: Layout & Navigation
 
