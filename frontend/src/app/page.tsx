@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardDescription, CardAction } from "@/components/ui/card";
-import { link } from "fs";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
   return (
@@ -8,9 +8,10 @@ export default function Home() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Welcome</CardTitle>
-          <CardDescription>This is a test</CardDescription>
+          <CardDescription>Create Account or Login</CardDescription>
           <CardAction>
             <Button variant="link">Sign in</Button>
+            <Input id="email" type="email" placeholder="name@example.com" />
           </CardAction>
         </CardHeader>
       </Card>
