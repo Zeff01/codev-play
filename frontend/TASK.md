@@ -26,7 +26,7 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 - [x] Create main layout component
 - [x] Build navigation header
 - [x] Create sidebar (game list)
-- [ ] Add footer component
+- [x] Add footer component
 - [x] Implement responsive design
 - [x] Add dark/light theme toggle
 
