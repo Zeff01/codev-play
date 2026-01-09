@@ -1,9 +1,13 @@
 import { Button } from "@/components/ui/button";
+import { useApiFetch } from "@/hooks/useApiFetch";
 
-export default function Home() {
+export default function DashboardPage() {
+  const { data, loading, error, fetchData } = useApiFetch("/todos/1");
+
   return (
-    <main className="p-8">
-      <Button>Hello</Button>
-    </main>
+    <div>
+      <p>Welcome to your app!</p>
+      <p>{data}</p>
+    </div>
   );
 }

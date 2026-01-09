@@ -1,13 +1,14 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { Request, Response} from "express"
-import { createUser, findUserByUsername,findUserByEmail, findUserByLogin } from "../models/user.model";
+import { Request, Response, NextFunction } from "express";
+import { createUser, findUser } from "../models/user.model";
+import { ApiResponse } from "../utils/apiResponse";
+import AppError from "../middleware/AppError";
 
-
-interface registerBody {    
-    email: string,
-    username: string,
-    password: string
+interface registerBody {
+  email: string;
+  username: string;
+  password: string;
 }
 
 export const register = async (req: Request<{}, {}, registerBody>, res: Response) => {
@@ -15,15 +16,15 @@ export const register = async (req: Request<{}, {}, registerBody>, res: Response
     const { email, username, password } = req.body;
 
     if (!email || !username || !password) {
-      return res.status(400).json({ msg: "All fields are required" });
+      return ApiResponse.error(res, "All fields are required", 400);
     }
 
     if (await findUserByEmail(email)) {
-      return res.status(400).json({ msg: "Email already registered" });
+      return ApiResponse.error(res, "Email already registered", 400);
     }
 
     if (await findUserByUsername(username)) {
-      return res.status(400).json({ msg: "Username already taken" });
+      return ApiResponse.error(res, "Username already taken", 400);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -31,19 +32,34 @@ export const register = async (req: Request<{}, {}, registerBody>, res: Response
 
     const { password: _, ...userWithoutPassword } = newUser;
     res.status(201).json(userWithoutPassword);
+    
+    return ApiResponse.success(
+      res,
+      { user: userWithoutPassword },
+      "User registered successfully",
+      201
+      
   } catch (error) {
-    console.error("REGISTER ERROR:", error);
-    res.status(500).json({ msg: "Server error" });
+     next(new AppError("Registration failed", 500));
   }
 };
 
-export const login = async (req: Request<{}, {}, { username: string; password: string }>, res: Response) => {
+export const login = async (
+  req: Request<{}, {}, { username: string; password: string }>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { username, password } = req.body;
 
     const user = await findUserByLogin(username);
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(400).json({ msg: "Invalid username or password" });
+    if (!user) {
+      return ApiResponse.error(res, "Invalid credentials", 401);
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return ApiResponse.error(res, "Invalid credentials", 401);
     }
 
     const token = jwt.sign(
@@ -53,10 +69,14 @@ export const login = async (req: Request<{}, {}, { username: string; password: s
     );
 
     const { password: _, ...userWithoutPassword } = user;
-    res.json({ token, user: userWithoutPassword });
+
+    return ApiResponse.success(
+      res,
+      { token, user: userWithoutPassword },
+      "Login successful"
+    );
   } catch (error) {
-    console.error("LOGIN ERROR:", error);
-    res.status(500).json({ msg: "Server error" });
+    next(new AppError("Login failed", 500));
   }
 };
 

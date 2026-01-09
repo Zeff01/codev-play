@@ -10,7 +10,10 @@ import dotenv from "dotenv";
 import { Server } from "socket.io";
 import { initializeSocket } from "./config/socket-server";
 import http from "http";
-import { pool, connectDB } from "./config/db";
+import { connectDB } from "./config/db";
+
+// Routes
+import authRoutes from "./routes/auth.UserRoutes";
 
 
 
@@ -39,7 +42,7 @@ app.get("/health", (_req: Request, res: Response) => {
   res.json({ status: "ok", message: "Codev-Play API is running" });
 });
 
-// API routes will be added here
+// API routes
 app.get("/api", (_req: Request, res: Response) => {
   res.json({
     message: "Welcome to Codev-Play API",
@@ -59,24 +62,23 @@ app.post('/logout', (req: Request, res: Response) => {
 initializeSocket(io);
 
 // 404 handler — for unknown routes
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req: Request, _res: Response, next: NextFunction) => {
   next(new AppError(`Page not found - ${req.originalUrl}`, 404));
 });
 
 // Global Error Handlers
-app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
+app.use((err: AppError, _req: Request, res: Response, _next: NextFunction) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
 
-  const response: any = {
+  const response = {
     success: false,
-    message,
+    error: {
+      message,
+      ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
+    },
     statusCode,
   };
-
-  if (process.env.NODE_ENV !== "production") {
-    response.stack = err.stack;
-  }
 
   res.status(statusCode).json(response);
 });

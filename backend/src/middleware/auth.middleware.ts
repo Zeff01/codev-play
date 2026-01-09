@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
+import { ApiResponse } from "../utils/apiResponse";
 
 export const auth = (
   req: Request,
@@ -9,28 +10,28 @@ export const auth = (
   try {
     const header = req.headers.authorization;
 
-    if (!header) {
-      return res.status(401).json({ msg: "No authorization header" });
+    if (!header || !header.startsWith("Bearer ")) {
+      return ApiResponse.error(res, "Unauthorized", 401);
     }
 
-    if (!header.startsWith("Bearer ")) {
-      return res.status(401).json({ msg: "Invalid authorization format" });
+    if (!process.env.JWT_SECRET) {
+      return ApiResponse.error(res, "JWT secret missing", 500);
     }
 
     const token = header.split(" ")[1];
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({ msg: "JWT secret not configured" });
-    }
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    ) as jwt.JwtPayload;
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-
     next();
-  } catch (error) {
-    return res.status(401).json({ msg: "Invalid or expired token" });
+  } catch {
+    return ApiResponse.error(res, "Invalid or expired token", 401);
   }
 };
+
 
 
 export const registerValidation = (
@@ -38,42 +39,60 @@ export const registerValidation = (
   res: Response,
   next: NextFunction
 ) => {
-  try {
-  const { email, username, password } = req.body;
-    if (!email || !username || !password) 
-        return res.status(400).json({ msg: "Email, username, and password are required" });
+  const email = req.body.email?.trim();
+  const username = req.body.username?.trim();
+  const password = req.body.password;
 
-    if (password.length < 6) 
-        return res.status(400).json({ msg: "Password must be at least 6 characters long" });
-    if (!/^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/.test(email)) 
-        return res.status(400).json({ msg: "Invalid email format" });
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-        return res.status(400).json({ msg: "Username can only contain letters, numbers, and underscores" });
-    }
-    next();
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Server error" });
-    }
+  if (!email || !username || !password) {
+    return ApiResponse.error(res, "All fields are required", 400);
+  }
+
+  if (!/^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+    return ApiResponse.error(res, "Invalid email format", 400);
+  }
+
+  if (username.length < 3 || username.length > 20) {
+    return ApiResponse.error(
+      res,
+      "Username must be between 3 and 20 characters",
+      400
+    );
+  }
+
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+    return ApiResponse.error(
+      res,
+      "Username can only contain letters, numbers, and underscores",
+      400
+    );
+  }
+
+  if (!/(?=.*[A-Z])(?=.*\d).{8,}/.test(password)) {
+    return ApiResponse.error(
+      res,
+      "Password must be at least 8 characters, include a number and an uppercase letter",
+      400
+    );
+  }
+
+  next();
 };
+
 
 export const loginValidation = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  try {
-    const { username, password } = req.body;
-    if (!username || !password) 
-        return res.status(400).json({ msg: "Username and password are required" });
+  const { username, password } = req.body;
 
-    if (password.length < 6) 
-        return res.status(400).json({ msg: "Password must be at least 6 characters long" });
-    if (!/^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/.test(username)) 
-        return res.status(400).json({ msg: "Invalid username format" });
-    next();
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Server error" });
+  if (!username || !password) {
+    return ApiResponse.error(res, "Username and password are required", 400);
   }
+
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+    return ApiResponse.error(res, "Invalid username format", 400);
+  }
+
+  next();
 };

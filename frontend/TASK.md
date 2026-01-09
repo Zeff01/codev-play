@@ -15,27 +15,27 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 ### TASK-F002: Core UI Components
 
 - [x] Create Button component (Shadcn/custom)
-- [ ] Create Card component
-- [ ] Create Input component
-- [ ] Create Modal/Dialog component
-- [ ] Create Loading spinner component
-- [ ] Create Toast notification system
+- [x] Create Card component
+- [x] Create Input component
+- [x] Create Modal/Dialog component
+- [x] Create Loading spinner component
+- [x] Create Toast notification system
 
 ### TASK-F003: Layout & Navigation
 
-- [ ] Create main layout component
-- [ ] Build navigation header
-- [ ] Create sidebar (game list)
+- [x] Create main layout component
+- [x] Build navigation header
+- [x] Create sidebar (game list)
 - [x] Add footer component
-- [ ] Implement responsive design
-- [ ] Add dark/light theme toggle
+- [x] Implement responsive design
+- [x] Add dark/light theme toggle
 
 ### TASK-F004: API Integration Setup
 
-- [ ] Create API client utility
-- [ ] Setup Axios/Fetch wrapper
-- [ ] Add API base URL configuration
-- [ ] Create error handling interceptor
+- [x] Create API client utility
+- [x] Setup Axios/Fetch wrapper
+- [x] Add API base URL configuration
+- [x] Create error handling interceptor
 - [ ] Add loading state management
 - [ ] Setup environment variables
 
@@ -56,14 +56,14 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 - [ ] Add persistent storage (localStorage)
 - [ ] Create state hydration logic
 
-### TASK-F007: Authentication UI
+### TASK-F007: Authentication UI(Joshua Hermoso)
 
-- [ ] Create login page
-- [ ] Create registration page
-- [ ] Add form validation
-- [ ] Create auth context/hook
-- [ ] Add protected route wrapper
-- [ ] Create user profile page
+- [✓] Create login page
+- [✓] Create registration page
+- [✓] Add form validation
+- [✓] Create auth context/hook
+- [✓] Add protected route wrapper
+- [] Create user profile page
 
 ## Home & Dashboard
 

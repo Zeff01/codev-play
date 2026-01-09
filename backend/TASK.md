@@ -12,35 +12,35 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [x] Add health check endpoint
 - [x] Setup development scripts
 
-### TASK-B002: Database Setup
-- [ ] Choose and install database (MongoDB/PostgreSQL)
-- [ ] Setup database connection
-- [ ] Create database configuration
-- [ ] Add connection error handling
-- [ ] Create environment variables for DB config
+### TASK-B002: Database Setup (COMPLETED)
+- [x] Choose and install database (MongoDB/PostgreSQL)
+- [x] Setup database connection
+- [x] Create database configuration
+- [x] Add connection error handling
+- [x] Create environment variables for DB config
 
-### TASK-B003: Add WebSocket Support
-- [ ] Install Socket.io
-- [ ] Setup Socket.io server
-- [ ] Create connection handler
-- [ ] Add room management utilities
-- [ ] Test real-time communication
+### TASK-B003: Add WebSocket Support (COMPLETED)
+- [x] Install Socket.io
+- [x] Setup Socket.io server
+- [x] Create connection handler
+- [x] Add room management utilities
+- [x] Test real-time communication
 
-### TASK-B004: Authentication & User Management
-- [ ] Install JWT and bcrypt
-- [ ] Create user schema/model
-- [ ] Implement user registration endpoint
-- [ ] Implement login endpoint
-- [ ] Add JWT token generation
-- [ ] Create auth middleware
-- [ ] Add token validation
+### TASK-B004: Authentication & User Management (COMPLETED)
+- [x] Install JWT and bcrypt
+- [x] Create user schema/model
+- [x] Implement user registration endpoint
+- [x] Implement login endpoint
+- [x] Add JWT token generation
+- [x] Create auth middleware
+- [x] Add token validation
 
 ### TASK-B005: Error Handling & Validation
-- [ ] Create error handling middleware
-- [ ] Add request validation (express-validator)
-- [ ] Create custom error classes
+- [x] Create error handling middleware
+- [x] Add request validation (express-validator)
+- [x] Create custom error classes
 - [ ] Add logging system (Winston/Morgan)
-- [ ] Standardize API responses
+- [x] Standardize API responses
 
 ## Game: Tic-Tac-Toe
 
