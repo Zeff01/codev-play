@@ -23,12 +23,12 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 
 ### TASK-F003: Layout & Navigation
 
-- [ ] Create main layout component
-- [ ] Build navigation header
-- [ ] Create sidebar (game list)
+- [x] Create main layout component
+- [x] Build navigation header
+- [x] Create sidebar (game list)
 - [x] Add footer component
-- [ ] Implement responsive design
-- [ ] Add dark/light theme toggle
+- [x] Implement responsive design
+- [x] Add dark/light theme toggle
 
 ### TASK-F004: API Integration Setup
 
