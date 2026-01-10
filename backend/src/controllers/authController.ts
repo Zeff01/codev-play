@@ -11,37 +11,36 @@ interface registerBody {
   password: string;
 }
 
-export const register = async (
-  req: Request<{}, {}, registerBody>,
-  res: Response,
-  next: NextFunction
-) => {
+export const register = async (req: Request<{}, {}, registerBody>, res: Response) => {
   try {
     const { email, username, password } = req.body;
 
-    // Check if user already exists
-    const userExist = await findUser(email, username);
-    if (userExist) {
-      return ApiResponse.error(res, "User already exists", 400);
+    if (!email || !username || !password) {
+      return ApiResponse.error(res, "All fields are required", 400);
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    if (await findUserByEmail(email)) {
+      return ApiResponse.error(res, "Email already registered", 400);
+    }
 
-    // Create user
+    if (await findUserByUsername(username)) {
+      return ApiResponse.error(res, "Username already taken", 400);
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await createUser(email, username, hashedPassword);
 
-    // Remove password from response
     const { password: _, ...userWithoutPassword } = newUser;
-
+    res.status(201).json(userWithoutPassword);
+    
     return ApiResponse.success(
       res,
       { user: userWithoutPassword },
       "User registered successfully",
       201
-    );
+      
   } catch (error) {
-    next(new AppError("Registration failed", 500));
+     next(new AppError("Registration failed", 500));
   }
 };
 
@@ -53,26 +52,22 @@ export const login = async (
   try {
     const { username, password } = req.body;
 
-    // Find user
-    const user = await findUser("", username);
+    const user = await findUserByLogin(username);
     if (!user) {
       return ApiResponse.error(res, "Invalid credentials", 401);
     }
 
-    // Verify password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return ApiResponse.error(res, "Invalid credentials", 401);
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user.id, username: user.username },
       process.env.JWT_SECRET!,
       { expiresIn: "1d" }
     );
 
-    // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
     return ApiResponse.success(
@@ -84,3 +79,5 @@ export const login = async (
     next(new AppError("Login failed", 500));
   }
 };
+
+

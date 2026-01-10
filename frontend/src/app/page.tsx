@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useApiFetch } from "@/hooks/useApiFetch";
 
 export default function DashboardPage() {

@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import AppError from "./middleware/AppError";
+import UserRoutes from "./routes/auth.UserRoutes";
 
 // Utils
 import cors from "cors";
@@ -13,6 +14,8 @@ import { connectDB } from "./config/db";
 
 // Routes
 import authRoutes from "./routes/auth.UserRoutes";
+
+
 
 dotenv.config();
 
@@ -31,7 +34,7 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({origin: "http://localhost:4000", credentials: true}));
 app.use(express.json());
 
 // Health check endpoint
@@ -48,8 +51,12 @@ app.get("/api", (_req: Request, res: Response) => {
   });
 });
 
-// Auth routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", UserRoutes);
+
+app.post('/logout', (req: Request, res: Response) => {
+  res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'strict', path: '/' });
+  res.json({ msg: 'Logged out successfully' });
+})
 
 // Socket.io Integration
 initializeSocket(io);
