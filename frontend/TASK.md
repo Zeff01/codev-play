@@ -36,8 +36,8 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 - [x] Setup Axios/Fetch wrapper
 - [x] Add API base URL configuration
 - [x] Create error handling interceptor
-- [ ] Add loading state management
-- [ ] Setup environment variables
+- [x] Add loading state management
+- [x] Setup environment variables
 
 ### TASK-F005: WebSocket Setup
 
