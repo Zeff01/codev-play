@@ -1,13 +1,13 @@
-import { Button } from "@/components/ui/button";
-import { useApiFetch } from "@/hooks/useApiFetch";
+"use client";
+
+import { Sidebar } from "@/components/sidebar";
+import { Header } from "@/components/header";
 
 export default function DashboardPage() {
-  const { data, loading, error, fetchData } = useApiFetch("/todos/1");
-
   return (
-    <div>
-      <p>Welcome to your app!</p>
-      <p>{data}</p>
+    <div className="flex -1 flex-col p-4">
+      <Header />
+      <Sidebar />
     </div>
   );
 }
