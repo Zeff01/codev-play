@@ -5,6 +5,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Setup & Infrastructure
 
 ### TASK-B001: Project Setup (COMPLETED)
+
 - [x] Initialize Node.js project
 - [x] Install Express, TypeScript, and dependencies
 - [x] Configure TypeScript
@@ -13,6 +14,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [x] Setup development scripts
 
 ### TASK-B002: Database Setup (COMPLETED)
+
 - [x] Choose and install database (MongoDB/PostgreSQL)
 - [x] Setup database connection
 - [x] Create database configuration
@@ -20,6 +22,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [x] Create environment variables for DB config
 
 ### TASK-B003: Add WebSocket Support (COMPLETED)
+
 - [x] Install Socket.io
 - [x] Setup Socket.io server
 - [x] Create connection handler
@@ -27,6 +30,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [x] Test real-time communication
 
 ### TASK-B004: Authentication & User Management (COMPLETED)
+
 - [x] Install JWT and bcrypt
 - [x] Create user schema/model
 - [x] Implement user registration endpoint
@@ -36,6 +40,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [x] Add token validation
 
 ### TASK-B005: Error Handling & Validation
+
 - [x] Create error handling middleware
 - [x] Add request validation (express-validator)
 - [x] Create custom error classes
@@ -45,21 +50,24 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Game: Tic-Tac-Toe
 
 ### TASK-B101: Tic-Tac-Toe Game Logic
-- [ ] Create game state schema/model
-- [ ] Implement board initialization
-- [ ] Add move validation logic
-- [ ] Implement win condition checking
-- [ ] Add draw condition detection
-- [ ] Create game state manager
+
+- [x] Create game state schema/model
+- [x] Implement board initialization
+- [x] Add move validation logic
+- [x] Implement win condition checking
+- [x] Add draw condition detection
+- [x] Create game state manager
 
 ### TASK-B102: Tic-Tac-Toe API Endpoints
-- [ ] POST /api/games/tictactoe/create - Create new game
-- [ ] GET /api/games/tictactoe/:gameId - Get game state
-- [ ] POST /api/games/tictactoe/:gameId/move - Make a move
-- [ ] POST /api/games/tictactoe/:gameId/reset - Reset game
-- [ ] GET /api/games/tictactoe/active - List active games
+
+- [x] POST /api/games/tictactoe/create - Create new game
+- [x] GET /api/games/tictactoe/:gameId - Get game state
+- [x] POST /api/games/tictactoe/:gameId/move - Make a move
+- [x] POST /api/games/tictactoe/:gameId/reset - Reset game
+- [x] GET /api/games/tictactoe/active - List active games
 
 ### TASK-B103: Tic-Tac-Toe Real-time Features
+
 - [ ] Setup game room socket events
 - [ ] Emit move updates to players
 - [ ] Handle player join/leave events
@@ -69,6 +77,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Game: Rock Paper Scissors
 
 ### TASK-B201: Rock Paper Scissors Game Logic
+
 - [ ] Create game schema/model
 - [ ] Implement choice validation
 - [ ] Add winner determination logic
@@ -77,6 +86,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Implement scoring system
 
 ### TASK-B202: Rock Paper Scissors API Endpoints
+
 - [ ] POST /api/games/rps/create - Create new game
 - [ ] POST /api/games/rps/:gameId/join - Join game
 - [ ] POST /api/games/rps/:gameId/choice - Submit choice
@@ -84,6 +94,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] GET /api/games/rps/:gameId/history - Get round history
 
 ### TASK-B203: Rock Paper Scissors Real-time Features
+
 - [ ] Setup matchmaking socket events
 - [ ] Emit choice submission (hidden)
 - [ ] Reveal both choices simultaneously
@@ -93,6 +104,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Game: Snake
 
 ### TASK-B301: Snake Game Logic
+
 - [ ] Create game state schema
 - [ ] Implement snake movement logic
 - [ ] Add collision detection
@@ -101,6 +113,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Create leaderboard system
 
 ### TASK-B302: Snake API Endpoints
+
 - [ ] POST /api/games/snake/start - Start new game
 - [ ] POST /api/games/snake/:gameId/move - Record move
 - [ ] POST /api/games/snake/:gameId/end - End game and save score
@@ -110,6 +123,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Game: Chess
 
 ### TASK-B401: Chess Game Logic
+
 - [ ] Install chess.js library
 - [ ] Create game state schema
 - [ ] Implement board initialization
@@ -119,6 +133,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Create move history tracking
 
 ### TASK-B402: Chess API Endpoints
+
 - [ ] POST /api/games/chess/create - Create new game
 - [ ] POST /api/games/chess/:gameId/join - Join game
 - [ ] POST /api/games/chess/:gameId/move - Make a move
@@ -128,6 +143,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] POST /api/games/chess/:gameId/draw - Offer draw
 
 ### TASK-B403: Chess Real-time Features
+
 - [ ] Setup chess room events
 - [ ] Emit move updates
 - [ ] Add turn timer
@@ -137,6 +153,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Game: Pac-Man
 
 ### TASK-B501: Pac-Man Game Logic
+
 - [ ] Create maze/level schema
 - [ ] Implement ghost AI logic
 - [ ] Add collision detection
@@ -145,6 +162,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Add level progression logic
 
 ### TASK-B502: Pac-Man API Endpoints
+
 - [ ] POST /api/games/pacman/start - Start new game
 - [ ] GET /api/games/pacman/levels - Get available levels
 - [ ] POST /api/games/pacman/:gameId/move - Process game tick
@@ -154,6 +172,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Game: Connect Four
 
 ### TASK-B601: Connect Four Game Logic
+
 - [ ] Create board schema (7x6 grid)
 - [ ] Implement piece drop logic
 - [ ] Add win condition checking (4 in a row)
@@ -162,6 +181,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Create AI opponent (optional)
 
 ### TASK-B602: Connect Four API Endpoints
+
 - [ ] POST /api/games/connectfour/create - Create game
 - [ ] POST /api/games/connectfour/:gameId/join - Join game
 - [ ] POST /api/games/connectfour/:gameId/drop - Drop piece
@@ -169,6 +189,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] POST /api/games/connectfour/:gameId/reset - Reset game
 
 ### TASK-B603: Connect Four Real-time Features
+
 - [ ] Setup game room
 - [ ] Emit piece drops
 - [ ] Broadcast win/draw events
@@ -177,6 +198,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Game: Tetris
 
 ### TASK-B701: Tetris Game Logic
+
 - [ ] Create game state schema
 - [ ] Implement tetromino shapes
 - [ ] Add rotation logic
@@ -186,6 +208,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Add level/speed progression
 
 ### TASK-B702: Tetris API Endpoints
+
 - [ ] POST /api/games/tetris/start - Start game
 - [ ] POST /api/games/tetris/:gameId/action - Process action
 - [ ] POST /api/games/tetris/:gameId/end - End game
@@ -195,6 +218,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Game: Pong
 
 ### TASK-B801: Pong Game Logic
+
 - [ ] Create game state schema
 - [ ] Implement ball physics
 - [ ] Add paddle movement
@@ -203,11 +227,13 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Add speed progression
 
 ### TASK-B802: Pong API Endpoints
+
 - [ ] POST /api/games/pong/create - Create game
 - [ ] POST /api/games/pong/:gameId/join - Join game
 - [ ] GET /api/games/pong/:gameId - Get game state
 
 ### TASK-B803: Pong Real-time Features
+
 - [ ] Setup game loop (60 FPS)
 - [ ] Emit paddle positions
 - [ ] Emit ball position
@@ -217,6 +243,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Game: Minesweeper
 
 ### TASK-B901: Minesweeper Game Logic
+
 - [ ] Create board generation logic
 - [ ] Implement mine placement
 - [ ] Add adjacent mine counting
@@ -225,6 +252,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Create win/loss detection
 
 ### TASK-B902: Minesweeper API Endpoints
+
 - [ ] POST /api/games/minesweeper/create - Create game
 - [ ] POST /api/games/minesweeper/:gameId/reveal - Reveal cell
 - [ ] POST /api/games/minesweeper/:gameId/flag - Toggle flag
@@ -234,6 +262,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Game: Memory Match
 
 ### TASK-B1001: Memory Match Game Logic
+
 - [ ] Create card deck schema
 - [ ] Implement card shuffling
 - [ ] Add pair matching logic
@@ -242,6 +271,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Add difficulty levels
 
 ### TASK-B1002: Memory Match API Endpoints
+
 - [ ] POST /api/games/memory/create - Create game
 - [ ] POST /api/games/memory/:gameId/flip - Flip card
 - [ ] GET /api/games/memory/:gameId - Get game state
@@ -249,6 +279,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] GET /api/games/memory/leaderboard - Get best scores
 
 ### TASK-B1003: Memory Match Multiplayer
+
 - [ ] Setup turn-based socket events
 - [ ] Emit card flips
 - [ ] Broadcast matches found
@@ -258,6 +289,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Testing & Documentation
 
 ### TASK-B1101: Unit Tests
+
 - [ ] Setup Jest/Mocha testing framework
 - [ ] Write tests for game logic
 - [ ] Write tests for API endpoints
@@ -265,12 +297,14 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Create test coverage reports
 
 ### TASK-B1102: Integration Tests
+
 - [ ] Write API integration tests
 - [ ] Test WebSocket connections
 - [ ] Test database operations
 - [ ] Test authentication flow
 
 ### TASK-B1103: API Documentation
+
 - [ ] Setup Swagger/OpenAPI
 - [ ] Document all endpoints
 - [ ] Add request/response examples
@@ -278,6 +312,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Add authentication documentation
 
 ### TASK-B1104: Performance Optimization
+
 - [ ] Add database indexing
 - [ ] Implement caching (Redis)
 - [ ] Optimize WebSocket events
@@ -287,6 +322,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 ## Deployment
 
 ### TASK-B1201: Production Setup
+
 - [ ] Configure production environment variables
 - [ ] Setup production database
 - [ ] Add security headers
@@ -294,12 +330,14 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Setup process manager (PM2)
 
 ### TASK-B1202: Docker Setup
+
 - [ ] Create Dockerfile
 - [ ] Create docker-compose.yml
 - [ ] Add environment configuration
 - [ ] Test containerized deployment
 
 ### TASK-B1203: CI/CD Pipeline
+
 - [ ] Setup GitHub Actions / CI tool
 - [ ] Add automated testing
 - [ ] Configure deployment pipeline
@@ -308,18 +346,21 @@ This document contains step-by-step tasks for implementing the backend API for C
 ---
 
 ## Task Status Legend
+
 - [ ] Not Started
 - [x] Completed
 - [~] In Progress
 - [!] Blocked
 
 ## Priority Levels
+
 - P0: Critical
 - P1: High Priority
 - P2: Medium Priority
 - P3: Low Priority
 
 ## Notes
+
 - Start with simpler games like Tic-Tac-Toe before moving to complex ones
 - Complete infrastructure tasks before game-specific tasks
 - Test each feature thoroughly before moving to the next
