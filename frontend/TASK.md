@@ -50,8 +50,8 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 
 ### TASK-F006: State Management
 
-- [ ] Setup state management (Context/Zustand/Redux)
-- [ ] Create user state store
+- [x] Setup state management (Context/Zustand/Redux)
+- [x] Create user state store
 - [ ] Create game state store
 - [ ] Add persistent storage (localStorage)
 - [ ] Create state hydration logic
