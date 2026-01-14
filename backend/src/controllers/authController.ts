@@ -1,7 +1,12 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { Request, Response, NextFunction } from "express";
-import { createUser, findUser } from "../models/user.model";
+import {
+  createUser,
+  findUserByEmail,
+  findUserByLogin,
+  findUserByUsername,
+} from "../models/user.model";
 import { ApiResponse } from "../utils/apiResponse";
 import AppError from "../middleware/AppError";
 
@@ -11,7 +16,11 @@ interface registerBody {
   password: string;
 }
 
-export const register = async (req: Request<{}, {}, registerBody>, res: Response) => {
+export const register = async (
+  req: Request<{}, {}, registerBody>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { email, username, password } = req.body;
 
@@ -32,15 +41,15 @@ export const register = async (req: Request<{}, {}, registerBody>, res: Response
 
     const { password: _, ...userWithoutPassword } = newUser;
     res.status(201).json(userWithoutPassword);
-    
+
     return ApiResponse.success(
       res,
       { user: userWithoutPassword },
       "User registered successfully",
       201
-      
+    );
   } catch (error) {
-     next(new AppError("Registration failed", 500));
+    next(new AppError("Registration failed", 500));
   }
 };
 
@@ -79,5 +88,3 @@ export const login = async (
     next(new AppError("Login failed", 500));
   }
 };
-
-
