@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import AppError from "./middleware/AppError";
 import UserRoutes from "./routes/auth.UserRoutes";
-
+import TicTacToeRoutes from "./routes/tictactoe.route";
 // Utils
 import cors from "cors";
 import dotenv from "dotenv";
@@ -14,8 +14,6 @@ import { connectDB } from "./config/db";
 
 // Routes
 import authRoutes from "./routes/auth.UserRoutes";
-
-
 
 dotenv.config();
 
@@ -34,7 +32,7 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors({origin: "http://localhost:4000", credentials: true}));
+app.use(cors({ origin: "http://localhost:4000", credentials: true }));
 app.use(express.json());
 
 // Health check endpoint
@@ -52,11 +50,17 @@ app.get("/api", (_req: Request, res: Response) => {
 });
 
 app.use("/api/auth", UserRoutes);
+app.use("/api/tictactoe", TicTacToeRoutes);
 
-app.post('/logout', (req: Request, res: Response) => {
-  res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'strict', path: '/' });
-  res.json({ msg: 'Logged out successfully' });
-})
+app.post("/logout", (req: Request, res: Response) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    path: "/",
+  });
+  res.json({ msg: "Logged out successfully" });
+});
 
 // Socket.io Integration
 initializeSocket(io);
