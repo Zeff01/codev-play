@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
+import { ClientSocketProvider } from "@/lib/socket/ClientSocketProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,12 +27,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider>
-            <div className="flex min-h-screen">
-              <div className="flex-1 flex flex-col">
-                <main>{children}</main>
+            <ClientSocketProvider>
+              <div className="flex min-h-screen">
+                <div className="flex-1 flex flex-col">
+                  <main>{children}</main>
+                </div>
               </div>
-            </div>
-            <Toaster />
+              <Toaster />
+            </ClientSocketProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

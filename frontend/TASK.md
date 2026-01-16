@@ -41,12 +41,12 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 
 ### TASK-F005: WebSocket Setup
 
-- [ ] Install Socket.io client
-- [ ] Create WebSocket context/hook
-- [ ] Add connection management
-- [ ] Implement reconnection logic
-- [ ] Add event listener utilities
-- [ ] Create connection status indicator
+- [x] Install Socket.io client
+- [x] Create WebSocket context/hook
+- [x] Add connection management
+- [x] Implement reconnection logic
+- [x] Add event listener utilities
+- [x] Create connection status indicator
 
 ### TASK-F006: State Management
 
