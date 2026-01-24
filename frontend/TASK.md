@@ -102,7 +102,7 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 - [x] Implement board rendering
 - [x] Add click handlers for moves
 - [x] Display current player turn
-- [ ] Show game result (win/draw)
+- [x] Show game result (win/draw)
 - [ ] Add rematch functionality
 
 ### TASK-F203: Tic-Tac-Toe Multiplayer
