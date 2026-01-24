@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 type GameStatusProps = {
   winner: "X" | "O" | null;
   isDraw: boolean;
@@ -5,7 +7,9 @@ type GameStatusProps = {
 
 export function GameStatus({ winner, isDraw }: GameStatusProps) {
   if (winner) {
-    return <p className="text-xl font-bold text-green-600"> Player {winner} wins</p>;
+    <motion.p initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+      Player X wins
+    </motion.p>;
   }
 
   if (isDraw) {
