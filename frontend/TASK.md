@@ -89,12 +89,12 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 
 ### TASK-F201: Tic-Tac-Toe UI Components
 
-- [ ] Create game board component
-- [ ] Design cell/square component
-- [ ] Add player indicator (X/O)
-- [ ] Create game status display
-- [ ] Add reset button
-- [ ] Design win animation
+- [x] Create game board component
+- [x] Design cell/square component
+- [x] Add player indicator (X/O)
+- [x] Create game status display
+- [x] Add reset button
+- [x] Design win animation
 
 ### TASK-F202: Tic-Tac-Toe Game Page
 
