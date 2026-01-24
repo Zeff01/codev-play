@@ -7,9 +7,11 @@ type GameStatusProps = {
 
 export function GameStatus({ winner, isDraw }: GameStatusProps) {
   if (winner) {
-    <motion.p initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-      Player X wins
-    </motion.p>;
+    return (
+      <motion.p initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-green-600">
+        Player {winner} wins
+      </motion.p>
+    );
   }
 
   if (isDraw) {
