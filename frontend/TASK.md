@@ -101,7 +101,7 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 - [x] Create game page route
 - [x] Implement board rendering
 - [x] Add click handlers for moves
-- [ ] Display current player turn
+- [x] Display current player turn
 - [ ] Show game result (win/draw)
 - [ ] Add rematch functionality
 
