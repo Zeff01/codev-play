@@ -5,6 +5,8 @@ import TicTacToeRoutes from "./routes/tictactoe.route";
 // Utils
 import cors from "cors";
 import dotenv from "dotenv";
+import logger from "./utils/logger";
+import requestLogger from "./middleware/requestLogger";
 
 // Servers
 import { Server } from "socket.io";
@@ -34,6 +36,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({ origin: "http://localhost:4000", credentials: true }));
 app.use(express.json());
+app.use(requestLogger);
 
 // Health check endpoint
 app.get("/health", (_req: Request, res: Response) => {
@@ -75,6 +78,9 @@ app.use((err: AppError, _req: Request, res: Response, _next: NextFunction) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
 
+  // Log the error
+  logger.error(`${statusCode} - ${message}`, { stack: err.stack });
+
   const response = {
     success: false,
     error: {
@@ -91,13 +97,13 @@ app.use((err: AppError, _req: Request, res: Response, _next: NextFunction) => {
 async function startServer() {
   try {
     await connectDB();
-    console.log("Database connected successfully.");
+    logger.info("Database connected successfully.");
 
     server.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+      logger.info(`Server is running on http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("Failed to connect to the database:", error);
+    logger.error("Failed to connect to the database:", error);
     process.exit(1);
   }
 }
