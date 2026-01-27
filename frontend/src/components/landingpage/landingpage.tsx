@@ -11,6 +11,7 @@ import Minesweeper from "../../../public/minesweeper.png"
 import Footer from '../footer';
 import { Button } from '../ui/button';
 import NavigationBar from './navbar';
+import { useRouter } from 'next/navigation';
 // @ts-ignore
 const Tilt = require('./vanilla-tilt');
 
@@ -25,7 +26,7 @@ const LandingPage = () => {
 }
 
 function HeroSection() {
-
+  const router = useRouter();
   const tl = useRef<gsap.core.Timeline | null>(null);
     useEffect(() => {
       tl.current = gsap.timeline();
@@ -73,7 +74,7 @@ function HeroSection() {
                             Where Codev hangout and play — a friendly space to experiment, learn, and build together.
                         </p>
                         <div className='hero-title opacity-0 translate-y-12.5 flex gap-4'>
-                            <Button className='px-8 py-3 text-lg cursor-pointer hover:bg-[#9747FF] hover:text-white'>Get Started</Button>
+                            <Button onClick={() => router.push('/login')} className='px-8 py-3 text-lg cursor-pointer hover:bg-[#9747FF] hover:text-white'>Get Started</Button>
                             <Button variant="outline" className='px-8 py-3 text-lg text-white border-white hover:bg-white/10 cursor-pointer'>Learn More</Button>
                         </div>
                     </div>
