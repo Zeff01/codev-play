@@ -66,7 +66,7 @@ export default function RegisterPage({ onToggleLogin }: RegisterProps) {
       <div className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
 
   <div className="absolute inset-0 bg-black/40" />
-    <div className="relative z-10 w-full max-w-md mx-6 p-8 space-y-8">
+    <div className="relative z-10 w-full max-w-md md:mx-6 p-8 space-y-8">
     <img
       className="block mx-auto h-10 mb-2 drop-shadow-lg"
       src={imgLogoPath}
