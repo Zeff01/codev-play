@@ -68,14 +68,14 @@ export default function RegisterPage({ onToggleLogin }: RegisterProps) {
   <div className="absolute inset-0 bg-black/40" />
     <div className="relative z-10 w-full max-w-md mx-6 p-8 space-y-8">
     <img
-      className="block mx-auto h-12 mb-6 drop-shadow-lg"
+      className="block mx-auto h-10 mb-2 drop-shadow-lg"
       src={imgLogoPath}
       alt="Logo"
     />
-    <h1 className="text-2xl font-bold text-center mb-1 font-noto-sans">
+    <h1 className="text-2xl text-center mb-1 font-noto-sans font-[Outfit]">
       Create new account
     </h1>
-    <p className="text-sm text-center text-white/70 mb-6">
+    <p className="text-sm text-center text-white/70 mb-6 font-[Roboto]">
       To start playing, fill it up!
     </p>
     <form onSubmit={handleSubmit} className="space-y-4">

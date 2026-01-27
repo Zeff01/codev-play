@@ -96,10 +96,10 @@ export default function LoginPage(): JSX.Element {
             <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 text-white">
                 <div className="flex flex-col md:flex items-center justify-center p-8 relative bg-slate-950 overflow-hidden">
                     <div className="absolute bottom-0 left-[-30%] right-0 top-[50%] h-125 w-125 rounded-full bg-[radial-gradient(circle_farthest-side,rgba(255,0,182,.15),rgba(255,255,255,0))]"></div><div className="absolute bottom-0 right-[-30%] top-[-10%] h-125 w-125 rounded-full bg-[radial-gradient(circle_farthest-side,rgba(255,0,182,.15),rgba(255,255,255,0))]"></div>
-                    <img className="justify-center max-h-10 mt-4 justify-self-start" src={logoPath} alt="CODEVPLAY Logo" />
+                    <img className="justify-center max-h-10 mt-4 mb-2 justify-self-start" src={logoPath} alt="CODEVPLAY Logo" />
                     <div className='flex flex-col justify-start items-center gap-1 w-full mt-0 mb-0'>
-                        <h1 className="font-['Outfit'] text-2xl ">Log in to your account </h1>
-                        <h2 className="font-['Roboto']">Welcome back! Please enter your details.</h2>
+                        <h1 className="font-[Outfit] text-2xl ">Log in to your account </h1>
+                        <h2 className="font-[Roboto] text-white/70 text-sm">Welcome back! Please enter your details.</h2>
                     </div>
                     <div className='flex flex-col gap-8 w-full justify-center max-w-sm'>
                         <form onSubmit={handleLogin} className="flex flex-col w-full max-w-md mt-8 z-20">
