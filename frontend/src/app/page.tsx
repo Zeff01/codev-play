@@ -1,13 +1,11 @@
 "use client";
 
-import { Sidebar } from "@/components/sidebar";
-import { Header } from "@/components/header";
+import LandingPage from "@/components/landingpage/landingpage";
 
 export default function DashboardPage() {
   return (
-    <div className="flex -1 flex-col p-4">
-      <Header />
-      <Sidebar />
-    </div>
+    <main>
+      <LandingPage />
+    </main>
   );
 }

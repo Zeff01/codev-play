@@ -63,14 +63,14 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 - [✓] Add form validation
 - [✓] Create auth context/hook
 - [✓] Add protected route wrapper
-- [] Create user profile page
+- [ ] Create user profile page
 
 ## Home & Dashboard
 
 ### TASK-F101: Home Page
 
-- [ ] Create landing page design
-- [ ] Add hero section
+- [x] Create landing page design
+- [x] Add hero section
 - [ ] Display available games grid
 - [ ] Add game preview cards
 - [ ] Implement game search/filter
