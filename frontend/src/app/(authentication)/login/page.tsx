@@ -2,7 +2,7 @@
 
 import React, { JSX, use, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import Register from '../register/page';
 import { gsap } from 'gsap';
@@ -17,6 +17,7 @@ export default function LoginPage(): JSX.Element {
 
     const { login } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const InputBox = "border-b border-gray-300 py-1 focus:border-b-2 focus:border-purple-700 transition-colors focus:outline-none peer bg-inherit w-full text-white"
     const ErrorInputBox = "border-red-400 focus:border-red-500";
@@ -53,7 +54,10 @@ export default function LoginPage(): JSX.Element {
     };
 
     const tl = useRef<gsap.core.Timeline | null>(null);
-    const [showRegister, setShowRegister] = useState(false);
+    const [showRegister, setShowRegister] = useState(() => {
+        const view = searchParams.get('view');
+        return view === 'register';
+    });
     const toggleLogin = () => {
         const isMdScreen = window.innerWidth >= 768;
         if (isMdScreen) {
