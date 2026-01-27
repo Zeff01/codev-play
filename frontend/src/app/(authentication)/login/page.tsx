@@ -155,7 +155,7 @@ export default function LoginPage(): JSX.Element {
                                 </p>
                             )}
 
-                            <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md mt-6 hover:scale-[1.02] hover:shadow-lg transition-all cursor-pointer">
+                            <button type="submit" className="bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 transition-all duration-200 hover:scale-[1.03] hover:shadow-[0_0_25px_rgba(99,102,241,0.6)] text-white font-semibold py-2 px-4 rounded-md mt-6 cursor-pointer">
                                 Sign In
                             </button>
                             <label htmlFor="Register" className="mt-4 text-sm self-center">

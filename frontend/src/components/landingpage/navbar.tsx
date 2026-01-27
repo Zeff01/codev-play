@@ -101,7 +101,7 @@ useEffect(() => {
             <li><Link href="#home" onClick={onHashClick('#home')}>Home</Link></li>
             <li><Link href="#about" onClick={onHashClick('#about')}>About</Link></li>
             <li><Link href="#showcase" onClick={onHashClick('#showcase')}>Explore</Link></li>
-            <li><Button onClick={() => router.push('/login')} className='mx-4 px-8 text-lg cursor-pointer hover:bg-[#9747FF] hover:text-white'>Sign In</Button></li>
+            <li><Button onClick={() => router.push('/login')} className='mx-4 px-8 text-lg cursor-pointer bg-linear-to-r hover:text-white hover:from-indigo-500 hover:to-purple-500 transition-all duration-200 hover:scale-[1.03] hover:shadow-[0_0_25px_rgba(99,102,241,0.6)]'>Sign In</Button></li>
           </ul>
         </div>
           <button className='block md:hidden cursor-pointer' onClick={toggleMenu}>

@@ -74,7 +74,7 @@ function HeroSection() {
                             Where Codev hangout and play — a friendly space to experiment, learn, and build together.
                         </p>
                         <div className='hero-title opacity-0 translate-y-12.5 flex gap-4'>
-                            <Button onClick={() => router.push('/login?view=register')} className='px-8 py-3 text-lg cursor-pointer hover:bg-[#9747FF] hover:text-white'>Get Started</Button>
+                            <Button onClick={() => router.push('/login?view=register')} className='px-8 py-3 text-lg cursor-pointer bg-linear-to-r hover:text-white hover:from-indigo-500 hover:to-purple-500 transition-all duration-200 hover:scale-[1.03] hover:shadow-[0_0_25px_rgba(99,102,241,0.6)]'>Get Started</Button>
                             <Button variant="outline" className='px-8 py-3 text-lg text-white border-white hover:bg-white/10 cursor-pointer'>Learn More</Button>
                         </div>
                     </div>
