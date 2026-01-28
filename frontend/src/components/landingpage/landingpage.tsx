@@ -63,14 +63,14 @@ function HeroSection() {
     return (
         <div className=''>
             <section id="home" className='relative min-h-screen flex flex-col justify-center items-center text-white pt-14'>
-                <div className="backdrop-gradient opacity-0 blur-[20px] absolute inset-0 -z-10 [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]"></div>
+                <div className="backdrop-gradient opacity-0 blur-[20px] absolute inset-0 -z-10 [background:radial-gradient(125%_125%_at_50%_20%,#000_40%,#63e_100%)]"></div>
                 <div className='max-w-450 w-full mx-auto px-8 pb-4 pt-18 xl:py-4 flex flex-col lg:flex-row items-center justify-between gap-8'>
                     {/* Left side - Title and CTA */}
                     <div className='flex-1 flex flex-col justify-center'>
-                        <h1 className='hero-title opacity-0 translate-y-12.5 text-4xl md:text-5xl lg:text-6xl font-bold font-["Outfit"] mb-6 leading-tight'>
-                            UNLOCK ENDLESS FUN FILLED WITH CODEV PLAY
+                        <h1 className='hero-title opacity-0 translate-y-12.5 text-4xl md:text-5xl lg:text-7xl font-bold font-["Outfit"] mb-6 leading-[0.9] max-w-2xl'>
+                            UNLOCK ENDLESS FUN FILLED WITH <span className='whitespace-nowrap bg-linear-to-r from-purple-500  to-cyan-400 inline-block text-transparent bg-clip-text hover:text-shadow-[0_0_25px_rgba(99,102,241,0.6)] cursor-default duration-300'>CODEV PLAY</span>
                         </h1>
-                        <p className='hero-title opacity-0 translate-y-12.5 text-lg md:text-xl text-gray-300 mb-8 max-w-lg font-["Roboto"]'>
+                        <p className='hero-title opacity-0 translate-y-12.5 text-lg md:text-xl text-gray-300 leading-6 mb-8 max-w-lg font-["Roboto"]'>
                             Where Codev hangout and play — a friendly space to experiment, learn, and build together.
                         </p>
                         <div className='hero-title opacity-0 translate-y-12.5 flex gap-4'>
