@@ -103,7 +103,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 
 ## Game: Snake
 
-### TASK-B301: Snake Game Logic
+### TASK-B301: Snake Game Logic(Joshua Ongoing)
 
 - [ ] Create game state schema
 - [ ] Implement snake movement logic
@@ -112,7 +112,7 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [ ] Add score calculation
 - [ ] Create leaderboard system
 
-### TASK-B302: Snake API Endpoints
+### TASK-B302: Snake API Endpoints(Joshua Ongoing)
 
 - [ ] POST /api/games/snake/start - Start new game
 - [ ] POST /api/games/snake/:gameId/move - Record move
