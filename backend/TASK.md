@@ -68,11 +68,11 @@ This document contains step-by-step tasks for implementing the backend API for C
 
 ### TASK-B103: Tic-Tac-Toe Real-time Features
 
-- [ ] Setup game room socket events
-- [ ] Emit move updates to players
-- [ ] Handle player join/leave events
-- [ ] Add turn management
-- [ ] Broadcast game state changes
+- [x] Setup game room socket events
+- [x] Emit move updates to players
+- [x] Handle player join/leave events
+- [x] Add turn management
+- [x] Broadcast game state changes
 
 ## Game: Rock Paper Scissors
 
