@@ -31,7 +31,7 @@ export const joinGame = async (gameId: string, userId: string) => {
   }
   if (!game.player_x) {
     throw new Error(
-      "Game has no host (player_x). Create game should set player_x."
+      "Game has no host (player_x). Create game should set player_x.",
     );
   }
   // assign second player as O and start
@@ -52,7 +52,7 @@ export const playMove = async (
   gameId: string,
   userId: number | null,
   row: number,
-  col: number
+  col: number,
 ) => {
   const game = await getGameById(gameId);
   if (!game) throw new Error("Game not found");
