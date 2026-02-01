@@ -56,14 +56,14 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 - [x] Add persistent storage (localStorage)
 - [x] Create state hydration logic
 
-### TASK-F007: Authentication UI(Joshua Hermoso)
+### TASK-F007: Authentication UI (Joshua Hermoso)
 
 - [✓] Create login page
 - [✓] Create registration page
 - [✓] Add form validation
 - [✓] Create auth context/hook
 - [✓] Add protected route wrapper
-- [] Create user profile page
+- [ ] Create user profile page
 
 ## Home & Dashboard
 
