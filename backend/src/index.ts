@@ -1,7 +1,8 @@
 import express, { Request, Response, NextFunction } from "express";
 import AppError from "./middleware/AppError";
 import UserRoutes from "./routes/auth.UserRoutes";
-import TicTacToeRoutes from "./routes/tictactoe.route";
+import snakeRoutes from "./routes/snake.route";
+
 // Utils
 import cors from "cors";
 import dotenv from "dotenv";
@@ -10,10 +11,8 @@ import dotenv from "dotenv";
 import { Server } from "socket.io";
 import { initializeSocket } from "./config/socket-server";
 import http from "http";
-import { connectDB } from "./config/db";
+import { pool, connectDB } from "./config/db";
 
-// Routes
-import authRoutes from "./routes/auth.UserRoutes";
 
 dotenv.config();
 
@@ -25,7 +24,7 @@ const server = http.createServer(app);
 const PORT = 5000;
 
 // Middleware
-app.use(cors({ origin: "http://localhost:4000", credentials: true }));
+app.use(cors({origin: "http://localhost:4000", credentials: true}));
 app.use(express.json());
 
 // Health check endpoint
@@ -33,7 +32,7 @@ app.get("/health", (_req: Request, res: Response) => {
   res.json({ status: "ok", message: "Codev-Play API is running" });
 });
 
-// API routes
+// API routes will be added here
 app.get("/api", (_req: Request, res: Response) => {
   res.json({
     message: "Welcome to Codev-Play API",
@@ -43,39 +42,35 @@ app.get("/api", (_req: Request, res: Response) => {
 });
 
 app.use("/api/auth", UserRoutes);
-app.use("/api/tictactoe", TicTacToeRoutes);
+app.use("/api/snake", snakeRoutes);
 
-app.post("/logout", (req: Request, res: Response) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "strict",
-    path: "/",
-  });
-  res.json({ msg: "Logged out successfully" });
-});
+app.post('/logout', (req: Request, res: Response) => {
+  res.clearCookie('token', { httpOnly: true, secure: true, sameSite: 'strict', path: '/' });
+  res.json({ msg: 'Logged out successfully' });
+})
 
 // Socket.io Integration
 initializeSocket(server);
 
 // 404 handler — for unknown routes
-app.use((req: Request, _res: Response, next: NextFunction) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   next(new AppError(`Page not found - ${req.originalUrl}`, 404));
 });
 
 // Global Error Handlers
-app.use((err: AppError, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
 
-  const response = {
+  const response: any = {
     success: false,
-    error: {
-      message,
-      ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
-    },
+    message,
     statusCode,
   };
+
+  if (process.env.NODE_ENV !== "production") {
+    response.stack = err.stack;
+  }
 
   res.status(statusCode).json(response);
 });
