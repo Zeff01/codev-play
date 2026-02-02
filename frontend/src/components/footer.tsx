@@ -1,5 +1,7 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
+import CodevPlay from "../../public/codevplay-white.svg"
 import { useEffect, useState } from 'react'
 const Footer = () => {
     const [localTime, setLocalTime] = useState<string | null>(null);
@@ -20,7 +22,9 @@ const Footer = () => {
         <div className="mb-24 flex flex-col md:flex-row gap-12 justify-between items-start">
             {/* Column 1: Logo + Description */}
             <div className="flex-1 min-w-56">
-                <h2 className="text-2xl font-semibold tracking-tight">Codev Play</h2>
+                <Link href="/">
+                    <Image src={CodevPlay} alt="CodevPlay Logo" className='object-contain w-42 h-12'/>
+                </Link>
                 <p className="mt-3 text-sm text-neutral-300 max-w-96">
                     Where Codev hangout and play — a friendly space to experiment, learn, and build together.
                 </p>
