@@ -21,7 +21,11 @@ export const metadata: Metadata = {
   description: "Where Codev hangout and play — a friendly space to experiment, learn, and build together.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body className={`${outfit.variable} ${roboto.variable} antialiased`} suppressHydrationWarning>
