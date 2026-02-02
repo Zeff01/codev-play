@@ -21,15 +21,8 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-});
-
 // PORT
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 
 // Middleware
 app.use(cors({ origin: "http://localhost:4000", credentials: true }));
@@ -63,7 +56,7 @@ app.post("/logout", (req: Request, res: Response) => {
 });
 
 // Socket.io Integration
-initializeSocket(io);
+initializeSocket(server);
 
 // 404 handler — for unknown routes
 app.use((req: Request, _res: Response, next: NextFunction) => {
