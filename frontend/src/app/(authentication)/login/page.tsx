@@ -46,7 +46,7 @@ export default function LoginPage(): JSX.Element {
         }),
       });
       login(res.data.user, res.data.token);
-      router.push("/tic-tac-toe");
+      router.push("/dashboard");
     } catch (err: any) {
       console.log("API Error:", err);
     }
