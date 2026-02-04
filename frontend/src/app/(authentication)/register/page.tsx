@@ -19,64 +19,36 @@ export default function RegisterPage({ onToggleLogin }: RegisterProps) {
   const [ConfirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { request, error: apiError } = useApiFetch();
 
   const InputBox =
     "border-b border-gray-300 py-1 focus:border-b-2 focus:border-purple-700 transition-colors focus:outline-none peer bg-inherit w-full text-white";
   const imgLogoPath = "/codevplay-white.svg";
 
-  const validateInputs = () => {
-    if (!email || !username || !password || !ConfirmPassword) {
-      return "Please fill in all fields";
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return "Please enter a valid email address";
-    }
-
-    if (username.length < 3 || username.length > 20) {
-      return "Username must be 3-20 characters long";
-    }
-
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
-    if (!passwordRegex.test(password)) {
-      return "Password must be at least 8 characters, include uppercase, number, and special character";
-    }
-
-    if (password !== ConfirmPassword) {
-      return "Passwords do not match";
-    }
-
-    return null;
-  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validationError = validateInputs();
-    if (validationError) {
-      setError(validationError);
+    if (!username || !email || !password || !ConfirmPassword) {
+      setError("Please fill in all fields");
       return;
     }
 
+    if (password !== ConfirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
     try {
       setLoading(true);
       setError("");
 
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      await request("/api/auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, username, password }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data?.msg || "Registration failed");
-      }
-
       window.location.href = "/login";
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }

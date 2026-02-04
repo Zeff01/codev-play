@@ -1,11 +1,13 @@
 "use client";
 
-import React, { JSX, use, useEffect, useRef, useState } from "react";
+import React, { JSX, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import Register from "../register/page";
 import { gsap } from "gsap";
+import { useApiFetch } from "@/hooks/useApiFetch";
+import { log } from "console";
 
 export default function LoginPage(): JSX.Element {
   const logoPath = "/codevplay-white.svg";
@@ -18,6 +20,7 @@ export default function LoginPage(): JSX.Element {
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { request, error: apiError } = useApiFetch();
 
   const InputBox =
     "border-b border-gray-300 py-1 focus:border-b-2 focus:border-purple-700 transition-colors focus:outline-none peer bg-inherit w-full text-white";
@@ -33,24 +36,19 @@ export default function LoginPage(): JSX.Element {
       setError("Email or username must be at least 8 characters");
       return;
     }
+
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await request("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: emailorUsername, password }),
+        body: JSON.stringify({
+          username: emailorUsername,
+          password,
+        }),
       });
-
-      const data = await res.json();
-      console.log("check_data", data.data.token);
-
-      if (!res.ok) {
-        throw new Error(data?.msg || "Login failed");
-      }
-
-      login(data.data.user, data.data.token);
+      login(res.data.user, res.data.token);
       router.push("/tic-tac-toe");
     } catch (err: any) {
-      setError(err.message);
+      console.log("API Error:", err);
     }
   };
 
