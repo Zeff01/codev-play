@@ -18,7 +18,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_URL!, {
+    socketRef.current = io(process.env.NEXT_PUBLIC_API_URL!, {
       transports: ["websocket"],
     });
 
