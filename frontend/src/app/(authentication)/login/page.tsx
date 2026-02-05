@@ -20,7 +20,7 @@ export default function LoginPage(): JSX.Element {
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { request, error: apiError } = useApiFetch();
+  const { request } = useApiFetch();
 
   const InputBox =
     "border-b border-gray-300 py-1 focus:border-b-2 focus:border-purple-700 transition-colors focus:outline-none peer bg-inherit w-full text-white";
@@ -40,12 +40,13 @@ export default function LoginPage(): JSX.Element {
     try {
       const res = await request("/api/auth/login", {
         method: "POST",
+        credentials: "include",
         body: JSON.stringify({
           username: emailorUsername,
           password,
         }),
       });
-      login(res.data.user, res.data.token);
+      login(res.data.user);
       router.push("/dashboard");
     } catch (err: any) {
       console.log("API Error:", err);
