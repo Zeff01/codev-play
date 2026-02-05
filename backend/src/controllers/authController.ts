@@ -1,12 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { Request, Response, NextFunction } from "express";
-import {
-  createUser,
-  findUserByEmail,
-  findUserByLogin,
-  findUserByUsername,
-} from "../models/user.model";
+import { createUser, findUserByEmail, findUserByLogin, findUserByUsername } from "../models/user.model";
 import { ApiResponse } from "../utils/apiResponse";
 import AppError from "../middleware/AppError";
 
@@ -16,11 +11,7 @@ interface registerBody {
   password: string;
 }
 
-export const register = async (
-  req: Request<{}, {}, registerBody>,
-  res: Response,
-  next: NextFunction
-) => {
+export const register = async (req: Request<{}, {}, registerBody>, res: Response, next: NextFunction) => {
   try {
     const { email, username, password } = req.body;
 
@@ -42,12 +33,7 @@ export const register = async (
     const { password: _, ...userWithoutPassword } = newUser;
     res.status(201).json(userWithoutPassword);
 
-    return ApiResponse.success(
-      res,
-      { user: userWithoutPassword },
-      "User registered successfully",
-      201
-    );
+    return ApiResponse.success(res, { user: userWithoutPassword }, "User registered successfully", 201);
   } catch (error) {
     next(new AppError("Registration failed", 500));
   }
@@ -56,7 +42,7 @@ export const register = async (
 export const login = async (
   req: Request<{}, {}, { username: string; password: string }>,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { username, password } = req.body;
@@ -70,20 +56,20 @@ export const login = async (
     if (!isMatch) {
       return ApiResponse.error(res, "Invalid credentials", 401);
     }
+    ``;
 
-    const token = jwt.sign(
-      { id: user.id, username: user.username },
-      process.env.JWT_SECRET!,
-      { expiresIn: "1d" }
-    );
+    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+      res.cookie("token", token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    } catch (error) {
+      console.error("JWT verification failed:", error);
+    }
 
     const { password: _, ...userWithoutPassword } = user;
 
-    return ApiResponse.success(
-      res,
-      { token, user: userWithoutPassword },
-      "Login successful"
-    );
+    return ApiResponse.success(res, { user: userWithoutPassword }, "Login successful");
   } catch (error) {
     next(new AppError("Login failed", 500));
   }
