@@ -11,7 +11,7 @@ export function Sidebar() {
       </Button>
 
       <Button variant="ghost" asChild>
-        <Link href="#">Game 1</Link>
+        <Link href="/tic-tac-toe">Tic Tac Toe</Link>
       </Button>
 
       <Button variant="ghost" asChild>
