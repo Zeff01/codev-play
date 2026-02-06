@@ -39,12 +39,12 @@ This document contains step-by-step tasks for implementing the backend API for C
 - [x] Create auth middleware
 - [x] Add token validation
 
-### TASK-B005: Error Handling & Validation
+### TASK-B005: Error Handling & Validation (COMPLETED)
 
 - [x] Create error handling middleware
 - [x] Add request validation (express-validator)
 - [x] Create custom error classes
-- [ ] Add logging system (Winston/Morgan)
+- [x] Add logging system (Winston/Morgan)
 - [x] Standardize API responses
 
 ## Game: Tic-Tac-Toe
