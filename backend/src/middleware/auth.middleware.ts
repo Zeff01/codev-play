@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { ApiResponse } from "../utils/apiResponse";
-import cookieParser from "cookie-parser";
 
 export const auth = (req: Request, res: Response, next: NextFunction) => {
   try {
