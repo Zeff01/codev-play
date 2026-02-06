@@ -1,15 +1,10 @@
 // cell values
 export type Player = "X" | "O" | "";
-export type Board = Player[][];
-
+export type Board = ("" | "X" | "O")[];
 /**
  * Board Initialization
  * **/
-export const initializedBoard = (): Board => [
-  ["", "", ""],
-  ["", "", ""],
-  ["", "", ""],
-];
+export const initializedBoard = (): ("" | "X" | "O")[] => Array(9).fill("");
 
 /*
 Move Validation Logic
@@ -18,11 +13,7 @@ Rules to enforce:
   Target cell must be empty.
   Cannot place if game is already finished.
  */
-export const isValidMove = (
-  board: Board,
-  row: number,
-  col: number
-): boolean => {
+export const isValidMove = (board: Board, row: number, col: number): boolean => {
   return row >= 0 && row < 3 && col >= 0 && col < 3 && board[row][col] === "";
 };
 
@@ -80,14 +71,14 @@ export const checkWinner = (board: Board): Player | null => {
     ],
   ];
 
-  for (const line of lines) {
-    const [[r1, c1], [r2, c2], [r3, c3]] = line;
-    const value = board[r1][c1];
+  // for (const line of lines) {
+  //   const [[r1, c1], [r2, c2], [r3, c3]] = line;
+  //   const value = board[r1][c1];
 
-    if (value !== "" && value === board[r2][c2] && value === board[r3][c3]) {
-      return value;
-    }
-  }
+  //   if (value !== "" && value === board[r2][c2] && value === board[r3][c3]) {
+  //     return value;
+  //   }
+  // }
 
   return null;
 };
@@ -96,5 +87,4 @@ export const checkWinner = (board: Board): Player | null => {
  * Draw Condition Detection
  * check if board is full to determine the game is Draw
  */
-export const isDraw = (board: Board): boolean =>
-  board.flat().every((cell) => cell !== "");
+export const isDraw = (board: Board): boolean => board.flat().every((cell) => cell !== "");

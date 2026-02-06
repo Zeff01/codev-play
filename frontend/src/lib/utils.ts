@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   try {
-    const response = await fetch(`${endpoint}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
       headers: {
         "Content-Type": "application/json",
         ...(options.headers || {}),
@@ -17,7 +17,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "API Error");
+      throw new Error(errorData.error.message);
     }
 
     return response.json();
