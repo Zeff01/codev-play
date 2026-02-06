@@ -61,7 +61,7 @@ export const login = async (
     const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET!, { expiresIn: "7d" });
 
     try {
-      res.cookie("token", token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+      res.cookie("token", token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: "none", secure: true });
     } catch (error) {
       console.error("JWT verification failed:", error);
     }
