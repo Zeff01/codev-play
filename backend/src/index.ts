@@ -5,8 +5,8 @@ import TicTacToeRoutes from "./routes/tictactoe.route";
 // Utils
 import cors from "cors";
 import dotenv from "dotenv";
-
 // Servers
+import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import { initializeSocket } from "./config/socket-server";
 import http from "http";
@@ -27,6 +27,7 @@ const PORT = 5000;
 // Middleware
 app.use(cors({ origin: "http://localhost:4000", credentials: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 // Health check endpoint
 app.get("/health", (_req: Request, res: Response) => {
