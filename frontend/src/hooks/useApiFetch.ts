@@ -8,7 +8,7 @@ export function useApiFetch(endpoint: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchedData = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -21,5 +21,5 @@ export function useApiFetch(endpoint: string) {
     }
   };
 
-  return { data, loading, error, fetchData };
+  return { data, loading, error, fetchedData };
 }

@@ -68,11 +68,11 @@ This document contains step-by-step tasks for implementing the backend API for C
 
 ### TASK-B103: Tic-Tac-Toe Real-time Features
 
-- [ ] Setup game room socket events
-- [ ] Emit move updates to players
-- [ ] Handle player join/leave events
-- [ ] Add turn management
-- [ ] Broadcast game state changes
+- [x] Setup game room socket events
+- [x] Emit move updates to players
+- [x] Handle player join/leave events
+- [x] Add turn management
+- [x] Broadcast game state changes
 
 ## Game: Rock Paper Scissors
 
@@ -103,22 +103,22 @@ This document contains step-by-step tasks for implementing the backend API for C
 
 ## Game: Snake
 
-### TASK-B301: Snake Game Logic
+### TASK-B301: Snake Game Logic(Joshua Done)
 
-- [ ] Create game state schema
-- [ ] Implement snake movement logic
-- [ ] Add collision detection
-- [ ] Implement food generation
-- [ ] Add score calculation
-- [ ] Create leaderboard system
+- [x] Create game state schema
+- [x] Implement snake movement logic
+- [x] Add collision detection
+- [x] Implement food generation
+- [x] Add score calculation
+- [x] Create leaderboard system
 
-### TASK-B302: Snake API Endpoints
+### TASK-B302: Snake API Endpoints(Joshua Done)
 
-- [ ] POST /api/games/snake/start - Start new game
-- [ ] POST /api/games/snake/:gameId/move - Record move
-- [ ] POST /api/games/snake/:gameId/end - End game and save score
-- [ ] GET /api/games/snake/leaderboard - Get top scores
-- [ ] GET /api/games/snake/:userId/scores - Get user's scores
+- [x] POST /api/games/snake/start - Start new game
+- [x] POST /api/games/snake/:gameId/move - Record move
+- [x] POST /api/games/snake/:gameId/end - End game and save score
+- [x] GET /api/games/snake/leaderboard - Get top scores
+- [x] GET /api/games/snake/:userId/scores - Get user's scores
 
 ## Game: Chess
 

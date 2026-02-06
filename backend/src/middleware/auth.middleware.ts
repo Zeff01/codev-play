@@ -2,14 +2,9 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { ApiResponse } from "../utils/apiResponse";
 
-export const auth = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const auth = (req: Request, res: Response, next: NextFunction) => {
   try {
     const header = req.headers.authorization;
-
     if (!header || !header.startsWith("Bearer ")) {
       return ApiResponse.error(res, "Unauthorized", 401);
     }
@@ -20,24 +15,19 @@ export const auth = (
 
     const token = header.split(" ")[1];
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    ) as jwt.JwtPayload;
-
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as jwt.JwtPayload;
     req.user = decoded;
     next();
-  } catch {
+  } catch (err) {
+    console.error("JWT verification error:", err);
     return ApiResponse.error(res, "Invalid or expired token", 401);
   }
 };
 
-
-
 export const registerValidation = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const email = req.body.email?.trim();
   const username = req.body.username?.trim();
@@ -55,7 +45,7 @@ export const registerValidation = (
     return ApiResponse.error(
       res,
       "Username must be between 3 and 20 characters",
-      400
+      400,
     );
   }
 
@@ -63,7 +53,7 @@ export const registerValidation = (
     return ApiResponse.error(
       res,
       "Username can only contain letters, numbers, and underscores",
-      400
+      400,
     );
   }
 
@@ -71,18 +61,17 @@ export const registerValidation = (
     return ApiResponse.error(
       res,
       "Password must be at least 8 characters, include a number and an uppercase letter",
-      400
+      400,
     );
   }
 
   next();
 };
 
-
 export const loginValidation = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const { username, password } = req.body;
 

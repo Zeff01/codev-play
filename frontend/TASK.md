@@ -56,21 +56,21 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 - [x] Add persistent storage (localStorage)
 - [x] Create state hydration logic
 
-### TASK-F007: Authentication UI(Joshua Hermoso)
+### TASK-F007: Authentication UI (Joshua Hermoso)
 
 - [✓] Create login page
 - [✓] Create registration page
 - [✓] Add form validation
 - [✓] Create auth context/hook
 - [✓] Add protected route wrapper
-- [] Create user profile page
+- [ ] Create user profile page
 
 ## Home & Dashboard
 
 ### TASK-F101: Home Page
 
-- [ ] Create landing page design
-- [ ] Add hero section
+- [x] Create landing page design
+- [x] Add hero section
 - [ ] Display available games grid
 - [ ] Add game preview cards
 - [ ] Implement game search/filter
@@ -89,20 +89,20 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 
 ### TASK-F201: Tic-Tac-Toe UI Components
 
-- [ ] Create game board component
-- [ ] Design cell/square component
-- [ ] Add player indicator (X/O)
-- [ ] Create game status display
-- [ ] Add reset button
-- [ ] Design win animation
+- [x] Create game board component
+- [x] Design cell/square component
+- [x] Add player indicator (X/O)
+- [x] Create game status display
+- [x] Add reset button
+- [x] Design win animation
 
 ### TASK-F202: Tic-Tac-Toe Game Page
 
-- [ ] Create game page route
-- [ ] Implement board rendering
-- [ ] Add click handlers for moves
-- [ ] Display current player turn
-- [ ] Show game result (win/draw)
+- [x] Create game page route
+- [x] Implement board rendering
+- [x] Add click handlers for moves
+- [x] Display current player turn
+- [x] Show game result (win/draw)
 - [ ] Add rematch functionality
 
 ### TASK-F203: Tic-Tac-Toe Multiplayer
