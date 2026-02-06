@@ -7,7 +7,6 @@ import { Eye, EyeOff } from "lucide-react";
 import Register from "../register/page";
 import { gsap } from "gsap";
 import { useApiFetch } from "@/hooks/useApiFetch";
-import { log } from "console";
 
 export default function LoginPage(): JSX.Element {
   const logoPath = "/codevplay-white.svg";
