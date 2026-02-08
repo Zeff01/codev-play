@@ -1,63 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Board, Cell, PlayerIndicator, GameStatus, ResetButton } from "@/components/tic-tac-toe";
+import { useApiFetch } from "@/hooks/useApiFetch";
 
 export default function TicTacToePage() {
+  const gameId = "1";
   const [board, setBoard] = useState<(null | "X" | "O")[]>(Array(9).fill(null));
-  const [currentPlayer, setCurrentPlayer] = useState<"X" | "O">("X");
+  const { data: GameData, loading, error, request } = useApiFetch();
+  // const [currentPlayer, setCurrentPlayer] = useState<"X" | "O">("X");
 
-  function checkWinner(board: (null | "X" | "O")[]): "X" | "O" | null {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-
-    for (const [a, b, c] of lines) {
-      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-        return board[a];
-      }
-    }
-
-    return null;
-  }
-
-  const winner = checkWinner(board);
-  const isDraw = !winner && board.every(Boolean);
-
-  const handleClick = (i: number) => {
-    if (winner || board[i]) {
-      return;
-    }
-
-    const newBoard = [...board];
-    newBoard[i] = currentPlayer;
-    setBoard(newBoard);
-    setCurrentPlayer(currentPlayer === "X" ? "O" : "X");
-  };
+  useEffect(() => {
+    const fetchGame = async () => {
+      try {
+        const res = await request(`/api/games/tictactoe/${gameId}`);
+      } catch {}
+    };
+  });
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 gap-4">
       <h1 className="text-3xl font-bold">Tic Tac Toe</h1>
-      <GameStatus winner={winner} isDraw={isDraw} />
-      <PlayerIndicator currentPlayer={currentPlayer} />
+      {/* <GameStatus winner={winner} isDraw={isDraw} /> */}
+      {/* <PlayerIndicator currentPlayer={currentPlayer} /> */}
       <Board>
         {board.map((value, i) => (
-          <Cell key={i} value={value} onClick={() => handleClick(i)} />
+          <Cell key={i} value={value} onClick={() => console.log("clicked", i)} />
         ))}
       </Board>
-      <ResetButton
+      {/* <ResetButton
         onReset={() => {
           setBoard(Array(9).fill(null));
           setCurrentPlayer("X");
         }}
-      />
+      /> */}
     </div>
   );
 }
