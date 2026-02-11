@@ -68,22 +68,22 @@ This document contains step-by-step tasks for implementing the backend API for C
 
 ### TASK-B103: Tic-Tac-Toe Real-time Features
 
-- [ ] Setup game room socket events
-- [ ] Emit move updates to players
-- [ ] Handle player join/leave events
-- [ ] Add turn management
-- [ ] Broadcast game state changes
+- [x] Setup game room socket events
+- [x] Emit move updates to players
+- [x] Handle player join/leave events
+- [x] Add turn management
+- [x] Broadcast game state changes
 
 ## Game: Rock Paper Scissors
 
 ### TASK-B201: Rock Paper Scissors Game Logic
 
-- [ ] Create game schema/model
-- [ ] Implement choice validation
-- [ ] Add winner determination logic
-- [ ] Create round management
-- [ ] Add best-of-N support
-- [ ] Implement scoring system
+- [x] Create game schema/model
+- [x] Implement choice validation
+- [x] Add winner determination logic
+- [x] Create round management
+- [x] Add best-of-N support
+- [x] Implement scoring system
 
 ### TASK-B202: Rock Paper Scissors API Endpoints
 
