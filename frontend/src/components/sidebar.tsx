@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { Ghost } from "lucide-react";
 
 export function Sidebar() {
   return (
@@ -12,7 +11,7 @@ export function Sidebar() {
       </Button>
 
       <Button variant="ghost" asChild>
-        <Link href="#">Game 1</Link>
+        <Link href="/tic-tac-toe">Tic Tac Toe</Link>
       </Button>
 
       <Button variant="ghost" asChild>
