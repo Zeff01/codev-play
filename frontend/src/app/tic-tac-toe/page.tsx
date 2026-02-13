@@ -1,33 +1,44 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Board, Cell, PlayerIndicator, GameStatus, ResetButton } from "@/components/tic-tac-toe";
 import { useApiFetch } from "@/hooks/useApiFetch";
+import { ticTacToeService } from "@/services/games/ticTacToeService";
 
 export default function TicTacToePage() {
-  const gameId = "1";
   const [board, setBoard] = useState<(null | "X" | "O")[]>(Array(9).fill(null));
   const { data: GameData, loading, error, request } = useApiFetch();
   // const [currentPlayer, setCurrentPlayer] = useState<"X" | "O">("X");
 
-  useEffect(() => {
-    const fetchGame = async () => {
-      try {
-        const res = await request(`/api/games/tictactoe/${gameId}`);
-      } catch {}
-    };
-  });
+  const handleCreateGame = async () => {
+    const result = await ticTacToeService.createGame();
+    if (!result) {
+      console.error("Game creation failed");
+    }
+    console.log(result);
+  };
+
+  const fetchActiveGames = async () => {
+    const result = await ticTacToeService.fetchActiveGames();
+    if (!result) {
+      console.error("Failed to fetch active games");
+    }
+    console.log(result);
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 gap-4">
+    <div className="flex flex-col items-center  min-h-screen p-4 gap-4">
       <h1 className="text-3xl font-bold">Tic Tac Toe</h1>
+      <Button onClick={handleCreateGame}>Start Game</Button>
+      <Button onClick={fetchActiveGames}>Fetch Active Games</Button>
       {/* <GameStatus winner={winner} isDraw={isDraw} /> */}
       {/* <PlayerIndicator currentPlayer={currentPlayer} /> */}
-      <Board>
+      {/* <Board>
         {board.map((value, i) => (
           <Cell key={i} value={value} onClick={() => console.log("clicked", i)} />
         ))}
-      </Board>
+      </Board> */}
       {/* <ResetButton
         onReset={() => {
           setBoard(Array(9).fill(null));
