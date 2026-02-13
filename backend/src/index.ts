@@ -6,6 +6,9 @@ import snakeRoutes from "./routes/snake.route";
 // Utils
 import cors from "cors";
 import dotenv from "dotenv";
+import logger from "./utils/logger";
+import requestLogger from "./middleware/requestLogger";
+
 // Servers
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
@@ -26,6 +29,7 @@ const PORT = 5000;
 // Middleware
 app.use(cors({origin: "http://localhost:4000", credentials: true}));
 app.use(express.json());
+app.use(requestLogger);
 app.use(cookieParser());
 
 // Health check endpoint
@@ -63,7 +67,10 @@ app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
 
-  const response: any = {
+  // Log the error
+  logger.error(`${statusCode} - ${message}`, { stack: err.stack });
+
+  const response = {
     success: false,
     message,
     statusCode,
@@ -80,13 +87,13 @@ app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
 async function startServer() {
   try {
     await connectDB();
-    console.log("Database connected successfully.");
+    logger.info("Database connected successfully.");
 
     server.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+      logger.info(`Server is running on http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("Failed to connect to the database:", error);
+    logger.error("Failed to connect to the database:", error);
     process.exit(1);
   }
 }
