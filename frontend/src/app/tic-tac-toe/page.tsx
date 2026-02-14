@@ -1,80 +1,61 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Board, Cell, PlayerIndicator, GameStatus, ResetButton } from "@/components/tic-tac-toe";
-import { useApiFetch } from "@/hooks/useApiFetch";
-import { ticTacToeService } from "@/services/games/ticTacToeService";
+import { useSocketContext } from "@/context/SocketContext";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { CreateRoom } from "@/components/tic-tac-toe";
 
 export default function TicTacToePage() {
-  const [board, setBoard] = useState<(null | "X" | "O")[]>(Array(9).fill(null));
-  const [activeGames, setActiveGames] = useState<any[]>([]);
-  const { data: GameData, loading, error, request } = useApiFetch();
-  // const [currentPlayer, setCurrentPlayer] = useState<"X" | "O">("X");
+  const { socket, rooms } = useSocketContext();
 
-  useEffect(() => {
-    fetchActiveGames();
-  }, []);
-
-  const handleCreateGame = async () => {
-    const result = await ticTacToeService.createGame();
-    if (!result) {
-      console.error("Game creation failed");
-    }
-    console.log(result);
-  };
-
-  const fetchActiveGames = async () => {
-    const result = await ticTacToeService.fetchActiveGames();
-    if (!result) {
-      console.error("Failed to fetch active games");
-      return;
-    }
-    console.log(result);
-    setActiveGames(result);
+  const createRoom = async (roomName: string) => {
+    socket?.emit("room:create", { roomName });
   };
 
   return (
-    <div className="flex flex-col items-center  min-h-screen p-4 gap-4">
-      <h1 className="text-3xl font-bold">Tic Tac Toe</h1>
-      <Button onClick={handleCreateGame}>Create Game</Button>
+    <div className="flex flex-col items-center min-h-screen p-4 gap-6 max-w-4xl mx-auto">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-2">Tic Tac Toe</h1>
+        <p className="text-muted-foreground">Create a room to start playing</p>
+      </div>
 
-      {activeGames.length > 0 && (
-        <div className="w-full max-w-2xl">
-          <h2 className="text-xl font-semibold mb-4">Active Games</h2>
-          <div className="space-y-4">
-            {activeGames.map((game) => (
-              <div key={game.id} className="border rounded-lg p-4 bg-gray-50">
-                <div className="flex justify-between items-start">
-                  <div className="flex flex-col gap-1">
-                    <p className="font-medium text-blue-500">Game ID: {game.id}</p>
-                    <p className="text-sm text-gray-600">Status: {game.status}</p>
-                    <p className="text-sm text-gray-600">Created By: {game.player_x_username}</p>
-                    <p className="text-sm text-gray-600">Current Player: {game.current_player}</p>
+      <div className="flex gap-4">
+        <CreateRoom onCreateRoom={createRoom} />
+      </div>
+
+      <div className="w-full">
+        <h2 className="text-2xl font-semibold mb-4">Active Rooms</h2>
+        {rooms.length === 0 ? (
+          <Card>
+            <CardContent className="p-6 text-center">
+              <p className="text-muted-foreground">No active rooms. Create one to start playing!</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {rooms.map((room) => (
+              <Card key={room.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    {room.name}
+                    <Badge variant={room.playerCount >= 2 ? "secondary" : "default"}>
+                      {room.playerCount}/2 Players
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription>Room ID: {room.id}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      Created {new Date(room.createdAt).toLocaleTimeString()}
+                    </span>
                   </div>
-                </div>
-                <Button className="mt-3" size="sm" onClick={() => console.log("Join game:", game.id)}>
-                  Join Game
-                </Button>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* <GameStatus winner={winner} isDraw={isDraw} /> */}
-      {/* <PlayerIndicator currentPlayer={currentPlayer} /> */}
-      {/* <Board>
-        {board.map((value, i) => (
-          <Cell key={i} value={value} onClick={() => console.log("clicked", i)} />
-        ))}
-      </Board> */}
-      {/* <ResetButton
-        onReset={() => {
-          setBoard(Array(9).fill(null));
-          setCurrentPlayer("X");
-        }}
-      /> */}
+        )}
+      </div>
     </div>
   );
 }

@@ -1,10 +1,4 @@
-import {
-  checkWinner,
-  initializedBoard,
-  isDraw,
-  isValidMove,
-  Player,
-} from "../utils/tictactoe.logic";
+import { checkWinner, initializedBoard, isDraw, isValidMove } from "../utils/tictactoe.logic";
 import { ticTacToeModel } from "../models/tictactoe.model";
 import { GameService } from "./game.service";
 
@@ -37,24 +31,21 @@ export class TicTacToeService extends GameService<ticTacToeModel> {
     }
 
     if (!game.player_x) {
-      throw new Error(
-        "Game has no host (player_x). Create game should set player_x.",
-      );
+      throw new Error("Game has no host (player_x). Create game should set player_x.");
     }
 
     // assign second player as O and start
-    return await this.model.setPlayerOAndStart(gameId, userId);
+    return await this.model.updateGameState(gameId, {
+      ...game,
+      player_o: userId,
+      status: "IN_PROGRESS",
+    });
   }
 
   //Game State Manager
   //This manages the flow: current player, applying moves, switching turns:
 
-  async playMove(
-    gameId: string,
-    userId: number | null,
-    row: number,
-    col: number,
-  ) {
+  async playMove(gameId: string, userId: number | null, row: number, col: number) {
     const game = await this.model.getGameData(gameId);
     if (!game) throw new Error("Game not found");
 
@@ -68,10 +59,7 @@ export class TicTacToeService extends GameService<ticTacToeModel> {
     if (!isX && !isO) throw new Error("You are not a player in this game");
 
     // must be your turn
-    if (
-      (game.current_player === "X" && !isX) ||
-      (game.current_player === "O" && !isO)
-    ) {
+    if ((game.current_player === "X" && !isX) || (game.current_player === "O" && !isO)) {
       throw new Error("Not your turn");
     }
 

@@ -10,7 +10,7 @@ export const roomManager = new RoomManager();
 export function initializeSocket(server: HTTPServer) {
   const io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: process.env.CORS_ORIGIN || "*",
       methods: ["GET", "POST"],
     },
   });
@@ -26,9 +26,6 @@ export function initializeSocket(server: HTTPServer) {
 
     logger.info(`A user connected ${socket.id}`);
 
-    // ROOM MANAGEMENT
-
-    // Create a room
     socket.on("room:create", (data: { roomName?: string }) => {
       try {
         const room = roomManager.createRoom(socket.id, data?.roomName);
@@ -39,7 +36,7 @@ export function initializeSocket(server: HTTPServer) {
           room: roomManager.getRoomInfo(room.id),
         });
 
-        // Broadcast updated room list
+        logger.info(`Created room ${room.id} for user ${socket.id}`);
         io.emit("rooms:list", roomManager.listRooms());
       } catch (err) {
         logger.error("Error creating room", { error: err });
@@ -47,7 +44,6 @@ export function initializeSocket(server: HTTPServer) {
       }
     });
 
-    // Join a room
     socket.on("room:join", (data: { roomId: string }) => {
       try {
         const success = roomManager.joinRoom(data.roomId, socket.id);
@@ -78,7 +74,6 @@ export function initializeSocket(server: HTTPServer) {
       }
     });
 
-    // Leave a room
     socket.on("room:leave", (data: { roomId: string }) => {
       try {
         roomManager.leaveRoom(data.roomId, socket.id);
@@ -100,12 +95,10 @@ export function initializeSocket(server: HTTPServer) {
       }
     });
 
-    // Get list of available rooms
     socket.on("rooms:get", () => {
       socket.emit("rooms:list", roomManager.listRooms());
     });
 
-    // Get specific room info
     socket.on("room:get", (data: { roomId: string }) => {
       const roomInfo = roomManager.getRoomInfo(data.roomId);
       if (roomInfo) {
@@ -117,10 +110,9 @@ export function initializeSocket(server: HTTPServer) {
 
     // CHAT MESSAGES
 
-    // Handle Messages (global broadcast)
     socket.on("chat message", (msg) => {
       try {
-        logger.info("Message received", { message: msg });
+        logger.info("Message received from backend", { message: msg });
         io.emit("chat message", msg);
       } catch (err) {
         logger.error("Error handling chat message", { error: err });
@@ -129,7 +121,6 @@ export function initializeSocket(server: HTTPServer) {
 
     // DISCONNECT HANDLING
 
-    // Handle Disconnection
     socket.on("disconnect", (reason) => {
       logger.info(`User ${socket.id} disconnected`, { reason });
 

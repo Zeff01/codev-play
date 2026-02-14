@@ -9,23 +9,6 @@ export const ticTacToeService = {
       credentials: "include",
     });
 
-    if (res.success) {
-      console.log("Game created successfully");
-    }
-
-    return res;
-  },
-
-  fetchActiveGames: async () => {
-    const res = await apiFetch(`${base_url}/active`, {
-      method: "GET",
-      credentials: "include",
-    });
-
-    if (res.success) {
-      console.log("Games fetched successfully");
-    }
-
     return res;
   },
 };
