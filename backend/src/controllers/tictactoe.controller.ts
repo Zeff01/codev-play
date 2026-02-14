@@ -1,14 +1,10 @@
 import { Request, Response } from "express";
 import { getIO } from "../config/socket-server";
-import {
-  fetchGame,
-  joinGame,
-  listActiveGames,
-  playMove,
-  resetExistingGame,
-  startGame,
-} from "../services/tictactoaGame.service";
+import { TicTacToeService } from "../services/tictactoaGame.service";
 import { roomManager, userSocketMap } from "../config/socket-server";
+import { ticTacToeModel } from "../models/tictactoe.model";
+
+const tttService = new TicTacToeService(new ticTacToeModel());
 
 export const createGameController = async (
   req: Request,
@@ -16,7 +12,7 @@ export const createGameController = async (
 ): Promise<void> => {
   try {
     const Id = req.user?.id ? Number(req.user.id) : null;
-    const game = await startGame(Id);
+    const game = await tttService.startGame(Id);
 
     res.status(201).json(game);
   } catch (err) {
@@ -33,7 +29,7 @@ export const joinGameController = async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const gameId = String(req.params!.gameId);
 
-    const game = await joinGame(gameId, userId);
+    const game = await tttService.joinGame(gameId, userId);
     const socketId = userSocketMap.get(String(userId));
     const playerRoom = socketId ? roomManager.getPlayerRoom(socketId) : null;
 
@@ -57,7 +53,7 @@ export const getGameController = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const game = await fetchGame(req.params.gameId);
+    const game = await tttService.fetchGame(req.params.gameId);
     res.json(game);
   } catch (err) {
     const error = err as Error;
@@ -78,7 +74,7 @@ export const makeMoveController = async (
       return;
     }
     const userId = req.user?.id ? Number(req.user.id) : null;
-    const game = await playMove(req.params.gameId, userId, row, col);
+    const game = await tttService.playMove(req.params.gameId, userId, row, col);
 
     const socketId = userSocketMap.get(String(userId));
     const playerRoom = socketId ? roomManager.getPlayerRoom(socketId) : null;
@@ -103,7 +99,7 @@ export const resetGameController = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const game = await resetExistingGame(req.params.gameId);
+    const game = await tttService.resetExistingGame(req.params.gameId);
 
     const userId = String(game.player_x);
     const socketId = userSocketMap.get(userId);
@@ -128,7 +124,7 @@ export const listActiveGamesController = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const games = await listActiveGames();
+    const games = await tttService.listActiveGames();
     res.json(games);
   } catch (err) {
     const error = err as Error;

@@ -12,6 +12,8 @@ const pool = new Pool({
   port: Number(process.env.DB_PORT),
 });
 
+const client = await pool.connect();
+
 const connectDB = async () => {
   try {
     await pool.connect();
@@ -22,4 +24,4 @@ const connectDB = async () => {
   }
 };
 
-export { connectDB, pool };
+export { connectDB, pool, client };
