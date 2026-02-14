@@ -10,7 +10,7 @@ export const setPlayerX = async (gameId: string, userId: string) => {
          updated_at = NOW()
      WHERE id = $2
      RETURNING *`,
-    [userId, gameId]
+    [userId, gameId],
   );
   return result.rows[0];
 };
@@ -23,29 +23,34 @@ export const setPlayerOAndStart = async (gameId: string, userId: string) => {
          updated_at = NOW()
      WHERE id = $2
      RETURNING *`,
-    [userId, gameId]
+    [userId, gameId],
   );
   return result.rows[0];
 };
 
-export const tictactoeCreateGame = async (
-  board: Board,
-  currentPlayer: string,
-  userId: number | null
-) => {
+export const tictactoeCreateGame = async (board: Board, currentPlayer: string, userId: number | null) => {
   const result = await pool.query(
     `INSERT INTO public.tictactoe (board, current_player, status, player_x)
      VALUES ($1::jsonb, $2, 'WAITING', $3)
      RETURNING *`,
-    [JSON.stringify(board), currentPlayer, userId]
+    [JSON.stringify(board), currentPlayer, userId],
   );
   return result.rows[0];
 };
 
 export const getGameById = async (id: string) => {
-  const result = await pool.query("SELECT * FROM tictactoe WHERE id = $1", [
-    id,
-  ]);
+  const result = await pool.query(
+    `SELECT t.*, 
+            ux.username as player_x_username, 
+            ux.email as player_x_email,
+            uo.username as player_o_username, 
+            uo.email as player_o_email
+     FROM tictactoe t
+     LEFT JOIN users ux ON t.player_x = ux.id
+     LEFT JOIN users uo ON t.player_o = uo.id
+     WHERE t.id = $1`,
+    [id],
+  );
   return result.rows[0];
 };
 
@@ -59,13 +64,7 @@ export const updateGame = async (id: string, data: any) => {
          updated_at = NOW()
      WHERE id = $5
      RETURNING *`,
-    [
-      JSON.stringify(data.board),
-      data.current_player,
-      data.status,
-      data.winner,
-      id,
-    ]
+    [JSON.stringify(data.board), data.current_player, data.status, data.winner, id],
   );
   return result.rows[0];
 };
@@ -80,16 +79,23 @@ export const resetGame = async (id: string, board: Board) => {
          updated_at = NOW()
      WHERE id = $2
      RETURNING *`,
-    [JSON.stringify(board), id]
+    [JSON.stringify(board), id],
   );
   return result.rows[0];
 };
 
 export const getActiveGames = async () => {
   const result = await pool.query(
-    `SELECT * FROM tictactoe
-     WHERE status = 'IN_PROGRESS' OR status = 'WAITING'
-     ORDER BY created_at DESC`
+    `SELECT t.*, 
+            ux.username as player_x_username, 
+            ux.email as player_x_email,
+            uo.username as player_o_username, 
+            uo.email as player_o_email
+     FROM tictactoe t
+     LEFT JOIN users ux ON t.player_x = ux.id
+     LEFT JOIN users uo ON t.player_o = uo.id
+     WHERE t.status = 'IN_PROGRESS' OR t.status = 'WAITING'
+     ORDER BY t.created_at DESC`,
   );
   return result.rows;
 };
