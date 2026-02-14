@@ -3,13 +3,11 @@ import { getIO } from "../config/socket-server";
 import { TicTacToeService } from "../services/tictactoaGame.service";
 import { roomManager, userSocketMap } from "../config/socket-server";
 import { ticTacToeModel } from "../models/tictactoe.model";
+import logger from "../utils/logger";
 
 const tttService = new TicTacToeService(new ticTacToeModel());
 
-export const createGameController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const createGameController = async (req: Request, res: Response): Promise<void> => {
   try {
     const Id = req.user?.id ? Number(req.user.id) : null;
     const game = await tttService.startGame(Id);
@@ -26,8 +24,8 @@ export const createGameController = async (
 
 export const joinGameController = async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.id;
-    const gameId = String(req.params!.gameId);
+    const userId = req.user?.id;
+    const gameId = String(req.params?.gameId);
 
     const game = await tttService.joinGame(gameId, userId);
     const socketId = userSocketMap.get(String(userId));
@@ -48,10 +46,7 @@ export const joinGameController = async (req: Request, res: Response) => {
   }
 };
 
-export const getGameController = async (
-  req: Request<{ gameId: string }>,
-  res: Response,
-): Promise<void> => {
+export const getGameController = async (req: Request<{ gameId: string }>, res: Response): Promise<void> => {
   try {
     const game = await tttService.fetchGame(req.params.gameId);
     res.json(game);
@@ -94,10 +89,7 @@ export const makeMoveController = async (
   }
 };
 
-export const resetGameController = async (
-  req: Request<{ gameId: string }>,
-  res: Response,
-): Promise<void> => {
+export const resetGameController = async (req: Request<{ gameId: string }>, res: Response): Promise<void> => {
   try {
     const game = await tttService.resetExistingGame(req.params.gameId);
 
@@ -119,10 +111,7 @@ export const resetGameController = async (
   }
 };
 
-export const listActiveGamesController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const listActiveGamesController = async (req: Request, res: Response): Promise<void> => {
   try {
     const games = await tttService.listActiveGames();
     res.json(games);
