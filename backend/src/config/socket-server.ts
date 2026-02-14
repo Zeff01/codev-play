@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { Server as HTTPServer } from "http";
 import { RoomManager } from "../utils/RoomManager";
+import logger from "../utils/logger";
 
 export const userSocketMap = new Map<string, string>();
 let ioServer: Server | undefined;
@@ -17,15 +18,13 @@ export function initializeSocket(server: HTTPServer) {
   ioServer = io;
 
   io.on("connection", (socket) => {
-    const userId =
-      (socket.handshake.query.userId as string) ||
-      (socket.handshake.headers["user-id"] as string);
+    const userId = (socket.handshake.query.userId as string) || (socket.handshake.headers["user-id"] as string);
 
     if (userId) {
       userSocketMap.set(userId, socket.id);
     }
 
-    console.log("A user connected", socket.id);
+    logger.info(`A user connected ${socket.id}`);
 
     // ROOM MANAGEMENT
 
@@ -43,7 +42,7 @@ export function initializeSocket(server: HTTPServer) {
         // Broadcast updated room list
         io.emit("rooms:list", roomManager.listRooms());
       } catch (err) {
-        console.error("Error creating room:", err);
+        logger.error("Error creating room", { error: err });
         socket.emit("room:error", { message: "Failed to create room" });
       }
     });
@@ -74,7 +73,7 @@ export function initializeSocket(server: HTTPServer) {
         // Broadcast updated room list
         io.emit("rooms:list", roomManager.listRooms());
       } catch (err) {
-        console.error("Error joining room:", err);
+        logger.error("Error joining room", { error: err });
         socket.emit("room:error", { message: "Failed to join room" });
       }
     });
@@ -96,7 +95,7 @@ export function initializeSocket(server: HTTPServer) {
         // Broadcast updated room list
         io.emit("rooms:list", roomManager.listRooms());
       } catch (err) {
-        console.error("Error leaving room:", err);
+        logger.error("Error leaving room", { error: err });
         socket.emit("room:error", { message: "Failed to leave room" });
       }
     });
@@ -121,10 +120,10 @@ export function initializeSocket(server: HTTPServer) {
     // Handle Messages (global broadcast)
     socket.on("chat message", (msg) => {
       try {
-        console.log("Message received:", msg);
+        logger.info("Message received", { message: msg });
         io.emit("chat message", msg);
       } catch (err) {
-        console.error("Error handling chat message:", err);
+        logger.error("Error handling chat message", { error: err });
       }
     });
 
@@ -132,7 +131,7 @@ export function initializeSocket(server: HTTPServer) {
 
     // Handle Disconnection
     socket.on("disconnect", (reason) => {
-      console.log(`User ${socket.id} disconnected:`, reason);
+      logger.info(`User ${socket.id} disconnected`, { reason });
 
       // Find and leave any room the player was in
       const playerRoom = roomManager.getPlayerRoom(socket.id);
@@ -151,12 +150,12 @@ export function initializeSocket(server: HTTPServer) {
     });
 
     socket.on("error", (err) => {
-      console.error("Socket Error", err);
+      logger.error("Socket Error", { error: err });
     });
   });
 
   io.on("connect_error", (err) => {
-    console.error("Global socket connection error:", err);
+    logger.error("Global socket connection error", { error: err });
   });
 
   return io;
