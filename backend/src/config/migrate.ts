@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { pool } from "./db";
+import logger from "../utils/logger";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,9 +24,7 @@ async function runMigrations() {
     `);
 
     // ✅ 2) Read executed migrations (only filename column needed)
-    const { rows } = await client.query<{ filename: string }>(
-      "SELECT filename FROM migrations"
-    );
+    const { rows } = await client.query<{ filename: string }>("SELECT filename FROM migrations");
     const executed = new Set(rows.map((r) => r.filename));
 
     const files = fs
@@ -36,7 +35,7 @@ async function runMigrations() {
     for (const file of files) {
       if (executed.has(file)) continue;
 
-      console.log(`Running migration: ${file}`);
+      logger.info(`Running migration: ${file}`);
 
       const sql = fs.readFileSync(path.join(MIGRATIONS_DIR, file), "utf8");
 
@@ -45,9 +44,7 @@ async function runMigrations() {
       await client.query("BEGIN");
       try {
         await client.query(sql);
-        await client.query("INSERT INTO migrations (filename) VALUES ($1)", [
-          file,
-        ]);
+        await client.query("INSERT INTO migrations (filename) VALUES ($1)", [file]);
         await client.query("COMMIT");
       } catch (e) {
         await client.query("ROLLBACK");
@@ -55,10 +52,10 @@ async function runMigrations() {
       }
     }
 
-    console.log("✅ All migrations applied");
+    logger.info("✅ All migrations applied");
     process.exit(0);
   } catch (err) {
-    console.error("❌ Migration failed", err);
+    logger.error("❌ Migration failed", { error: err });
     process.exit(1);
   } finally {
     client.release();

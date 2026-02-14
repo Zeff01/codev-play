@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import pkg from "pg";
 const { Pool } = pkg;
+import logger from "../utils/logger";
 
 dotenv.config();
 
@@ -17,9 +18,9 @@ const client = await pool.connect();
 const connectDB = async () => {
   try {
     await pool.connect();
-    console.log("Connected to the database successfully.");
+    logger.info("Database connected successfully.");
   } catch (error) {
-    console.error("Database connection error:", error);
+    logger.error("Database connection error", { error });
     throw error;
   }
 };
