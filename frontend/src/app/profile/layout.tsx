@@ -22,7 +22,7 @@ export default function ProfileLayout({
 
                         <main className="flex-1">{children}</main>
 
-                        <Footer />
+                        {/* <Footer /> */}
                     </div>
                 </div>
                 <Toaster />
