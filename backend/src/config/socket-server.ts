@@ -17,6 +17,8 @@ export function initializeSocket(server: HTTPServer) {
 
   ioServer = io;
 
+  roomManager.clearAllRooms();
+
   io.on("connection", (socket) => {
     const userId = (socket.handshake.query.userId as string) || (socket.handshake.headers["user-id"] as string);
 
@@ -25,6 +27,8 @@ export function initializeSocket(server: HTTPServer) {
     }
 
     logger.info(`A user connected ${socket.id}`);
+
+    socket.emit("rooms:list", roomManager.listRooms());
 
     socket.on("room:create", (data: { roomName?: string }) => {
       try {
@@ -47,6 +51,7 @@ export function initializeSocket(server: HTTPServer) {
     socket.on("room:join", (data: { roomId: string }) => {
       try {
         const success = roomManager.joinRoom(data.roomId, socket.id);
+        console.log("joinRoom result:", data, success);
 
         if (!success) {
           socket.emit("room:error", { message: "Room not found" });
