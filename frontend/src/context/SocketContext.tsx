@@ -41,6 +41,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       setRooms(rooms);
     });
 
+    socketRef.current.on("room:joined", (data: { roomId: string }) => {
+      console.log("Room joined in frontend:", data);
+    });
+
     return () => {
       socketRef.current?.disconnect();
       socketRef.current = null;

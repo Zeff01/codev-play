@@ -4,12 +4,17 @@ import { useSocketContext } from "@/context/SocketContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreateRoom } from "@/components/tic-tac-toe";
+import { Button } from "@/components/ui/button";
 
 export default function TicTacToePage() {
   const { socket, rooms } = useSocketContext();
 
   const createRoom = async (roomName: string) => {
     socket?.emit("room:create", { roomName });
+  };
+
+  const joinRoom = async (roomId: string) => {
+    socket?.emit("room:join", { roomId });
   };
 
   return (
@@ -50,6 +55,17 @@ export default function TicTacToePage() {
                       Created {new Date(room.createdAt).toLocaleTimeString()}
                     </span>
                   </div>
+                  <span className="mt-2 block text-right">
+                    {room.playerCount >= 2 ? (
+                      <Button variant="outline" onClick={() => startGame(room.id)}>
+                        Start Game
+                      </Button>
+                    ) : (
+                      <Button variant="outline" onClick={() => joinRoom(room.id)}>
+                        Join Room
+                      </Button>
+                    )}
+                  </span>
                 </CardContent>
               </Card>
             ))}
