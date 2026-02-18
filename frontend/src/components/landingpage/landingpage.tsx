@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -138,6 +138,22 @@ function HeroSection() {
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+interface GameGridCardProps {
+  name: string;
+  image: StaticImageData;
+}
+
+function GameGridCard({ image, name }: GameGridCardProps) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/10 p-4 hover:border-purple-500/50 hover:bg-white/5 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+      <div className="relative aspect-square overflow-hidden rounded-lg">
+        <Image src={image} alt={name} fill className="object-cover" />
+      </div>
+      <h3 className="mt-3 text-base font-bold">{name}</h3>
     </div>
   );
 }
