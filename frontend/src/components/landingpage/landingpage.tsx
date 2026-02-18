@@ -22,6 +22,7 @@ const LandingPage = () => {
     <div>
       <NavigationBar />
       <HeroSection />
+      <GameSection />
       <AboutSection />
       <Footer />
     </div>
@@ -139,6 +140,24 @@ function HeroSection() {
         </div>
       </section>
     </div>
+  );
+}
+
+function GameSection() {
+  return (
+    <section className="mx-auto max-w-6xl px-8 pt-28 pb-20 text-center font-['Outfit']">
+      <h3 className="mb-10 text-4xl font-bold tracking-tight text-white">
+        Available Game
+      </h3>
+      <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-3">
+        <GameGridCard name="Pacman" image={Pacman} />
+        <GameGridCard name="Chess" image={Chess} />
+        <GameGridCard name="Tic Tac Toe" image={Tictactoe} />
+        <GameGridCard name="Tetris" image={Tetris} />
+        <GameGridCard name="Snake" image={Snake} />
+        <GameGridCard name="Minesweeper" image={Minesweeper} />
+      </div>
+    </section>
   );
 }
 
