@@ -120,19 +120,19 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 
 - [x] Create choice selection interface
 - [x] Design choice buttons (rock/paper/scissors)
-- [ ] Add choice animation
-- [ ] Create result display
-- [ ] Show round history
-- [ ] Design score tracker
+- [x] Add choice animation
+- [x] Create result display
+- [x] Show round history
+- [x] Design score tracker
 
 ### TASK-F302: Rock Paper Scissors Game Page
 
 - [x] Create game page route
-- [ ] Implement choice selection
+- [x] Implement choice selection
 - [ ] Add countdown timer
-- [ ] Display both players' choices
-- [ ] Show round winner
-- [ ] Track best-of-N series
+- [x] Display both players' choices
+- [x] Show round winner
+- [x] Track best-of-N series
 
 ### TASK-F303: Rock Paper Scissors Multiplayer
 
