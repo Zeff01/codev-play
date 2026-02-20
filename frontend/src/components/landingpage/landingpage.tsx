@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -22,6 +22,7 @@ const LandingPage = () => {
     <div>
       <NavigationBar />
       <HeroSection />
+      <GameSection />
       <AboutSection />
       <Footer />
     </div>
@@ -138,6 +139,40 @@ function HeroSection() {
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function GameSection() {
+  return (
+    <section className="mx-auto max-w-6xl px-8 pt-28 pb-20 text-center font-['Outfit']">
+      <h3 className="mb-10 text-4xl font-bold tracking-tight text-white">
+        Available Game
+      </h3>
+      <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-3">
+        <GameGridCard name="Pacman" image={Pacman} />
+        <GameGridCard name="Chess" image={Chess} />
+        <GameGridCard name="Tic Tac Toe" image={Tictactoe} />
+        <GameGridCard name="Tetris" image={Tetris} />
+        <GameGridCard name="Snake" image={Snake} />
+        <GameGridCard name="Minesweeper" image={Minesweeper} />
+      </div>
+    </section>
+  );
+}
+
+interface GameGridCardProps {
+  name: string;
+  image: StaticImageData;
+}
+
+function GameGridCard({ image, name }: GameGridCardProps) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/10 p-4 hover:border-purple-500/50 hover:bg-white/5 transition-all duration-300 group hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+      <div className="relative aspect-square overflow-hidden rounded-lg">
+        <Image src={image} alt={name} fill className="object-cover" />
+      </div>
+      <h3 className="mt-3 text-base font-bold">{name}</h3>
     </div>
   );
 }
