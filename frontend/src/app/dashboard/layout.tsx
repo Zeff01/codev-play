@@ -1,9 +1,13 @@
 import React from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+import Footer from "@/components/layout/Footer";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
