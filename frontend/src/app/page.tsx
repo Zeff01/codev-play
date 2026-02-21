@@ -1,11 +1,21 @@
 "use client";
+import Footer from "@/components/layout/Footer";
+import Navbar from "@/components/layout/Navbar";
+import GameSection from "@/components/home/GameSection";
+import HeroSection from "@/components/home/HeroSection";
+import AboutSection from "@/components/home/AboutSection";
+// @ts-ignore
 
-import LandingPage from "@/components/landingpage/landingpage";
-
-export default function DashboardPage() {
+export default function Home() {
   return (
     <main>
-      <LandingPage />
+      <div>
+        <Navbar />
+        <HeroSection />
+        <GameSection />
+        <AboutSection />
+        <Footer />
+      </div>
     </main>
   );
 }
