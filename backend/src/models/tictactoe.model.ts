@@ -1,5 +1,5 @@
 import { pool } from "@/config/db";
-import { Board } from "@/utils/game-logic/tictactoe-logic";
+import { Board } from "@/types/index";
 import { GameModel } from "@/models/game.model";
 
 export class ticTacToeModel extends GameModel {

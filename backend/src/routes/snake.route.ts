@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { endGame, getScoreforUser, leaderboard, move, startGame } from "@/controllers/snake/snake.start";
+import { endGame, getScoreforUser, leaderboard, move, startGame } from "@/controllers/snake.controller";
 
 const router = Router();
 

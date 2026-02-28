@@ -1,5 +1,40 @@
+"use client";
+
 import Link from "next/link";
-import { Button } from "./ui/button";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  LayoutDashboard,
+  Gamepad2,
+  Hand,
+  Crown,
+  Grid3x3,
+  Bug,
+  Columns,
+  Blocks,
+  Minus,
+  Bomb,
+  Brain,
+} from "lucide-react";
+
+const navItems = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+
+  { label: "Pac-Man", href: "/pacman", icon: Gamepad2 },
+  {
+    label: "Rock Paper Scissors",
+    href: "/rock-paper-scissors",
+    icon: Hand,
+  },
+  { label: "Chess", href: "/chess", icon: Crown },
+  { label: "Tic-Tac-Toe", href: "/tic-tac-toe", icon: Grid3x3 },
+  { label: "Snake", href: "/snake", icon: Bug },
+  { label: "Connect Four", href: "/connect-four", icon: Columns },
+  { label: "Tetris", href: "/tetris", icon: Blocks },
+  { label: "Pong", href: "/pong", icon: Minus },
+  { label: "Minesweeper", href: "/minesweeper", icon: Bomb },
+  { label: "Memory Match", href: "/memory", icon: Brain },
+];
 
 export function Sidebar() {
   return (

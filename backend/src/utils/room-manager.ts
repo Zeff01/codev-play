@@ -66,6 +66,7 @@ export class RoomManager {
   }
 
   getPlayerRoom(playerId: string): Room | undefined {
+    console.log(this.rooms.values());
     for (const room of this.rooms.values()) {
       if (room.players.has(playerId)) {
         return room;

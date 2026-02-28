@@ -2,7 +2,12 @@ import { Server, Socket } from "socket.io";
 import { Server as HTTPServer } from "http";
 import { RoomManager } from "@/utils/room-manager";
 import logger from "@/utils/logger";
-import { registerRoomEvents, registerGameEvents, registerChatEvents, registerDisconnectEvents } from "./handlers";
+import {
+  registerRoomEvents,
+  registerGameEvents,
+  registerChatEvents,
+  registerDisconnectEvents,
+} from "./handlers";
 
 export const userSocketMap = new Map<string, string>();
 let ioServer: Server | undefined;
@@ -19,13 +24,15 @@ export function initializeSocket(server: HTTPServer) {
   ioServer = io;
 
   io.on("connection", (socket) => {
-    const userId = (socket.handshake.query.userId as string) || (socket.handshake.headers["user-id"] as string);
+    const userId =
+      (socket.handshake.query.userId as string) ||
+      (socket.handshake.headers["user-id"] as string);
 
     if (userId) {
       userSocketMap.set(userId, socket.id);
     }
 
-    logger.info(`A user connected ${socket.id}`);
+    console.log("A user connected", socket.id, userSocketMap);
 
     // Send initial rooms list
     socket.emit("rooms:list", roomManager.listRooms());

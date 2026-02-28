@@ -2,9 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import { initializeGameState } from "@/services/snake/initial-game-state";
 import { generateFood } from "@/services/snake/food";
 import { pool } from "@/config/db";
-import { snakeMovement, wallCollision, selfCollision, invalidDirectionChange } from "@/services/snake/movement";
-import { GameState } from "@/types/snake.type";
+import { wallCollision, selfCollision, invalidDirectionChange } from "@/services/snake/movement";
+import { SnakeState } from "@/types/snake.type";
+import { GameStatus } from "@/types/game.type";
 import { eatFood } from "@/services/snake/food";
+import { moveEntity } from "@/utils/game-utils/movement";
 import logger from "@/utils/logger";
 
 export async function startGame(req: Request, res: Response, next: NextFunction) {
@@ -39,15 +41,16 @@ export async function move(req: Request, res: Response, next: NextFunction) {
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: "Game not found" });
     }
-    let gameState: GameState = result.rows[0].game_state;
+    let gameState: SnakeState = result.rows[0].game_state;
 
     if (invalidDirectionChange(gameState.direction, newDirection)) {
       newDirection = gameState.direction;
     }
 
-    gameState = snakeMovement(gameState);
+    gameState.direction = newDirection;
+    gameState.snakeBody = moveEntity(gameState.snakeBody, gameState.direction);
     if (wallCollision(gameState) || selfCollision(gameState)) {
-      gameState.status = "GAMEOVER";
+      gameState.status = GameStatus.GAMEOVER;
     } else {
       const foodEaten = eatFood(gameState);
       if (foodEaten) {
@@ -79,9 +82,9 @@ export async function endGame(req: Request, res: Response, next: NextFunction) {
       return res.status(404).json({ success: false, message: "Game not found" });
     }
 
-    const gameState: GameState = result.rows[0].game_state;
+    const gameState: SnakeState = result.rows[0].game_state;
 
-    if (gameState.status === "GAMEOVER") {
+    if (gameState.status === GameStatus.GAMEOVER) {
       console.log("Finalizing Game Score:", gameState.score);
 
       await pool.query(

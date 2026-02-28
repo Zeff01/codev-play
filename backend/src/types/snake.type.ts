@@ -1,13 +1,8 @@
-export type Position = {
-  x: number;
-  y: number;
-};
+import { Position, Direction, GameStatus } from "@/types/game.type";
 
-export type Directions = "UP" | "DOWN" | "LEFT" | "RIGHT";
+export type Directions = Direction;
 
-export type GameStatus = "PLAYING" | "GAMEOVER" | "FINISHED";
-
-export type GameState = {
+export type SnakeState = {
   gameId?: number;
   userId?: number;
   status: GameStatus;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { create } from "zustand";
 import type {
     Choice,
     RoundResult,
@@ -32,157 +32,253 @@ function getResult(player: Choice, opponent: Choice): RoundResult {
 const BEST_OF = 5;
 const WINS_NEEDED = Math.ceil(BEST_OF / 2); // 3
 
-// ── Hook ───────────────────────────────────────────────────────────────────
+// ── Types ──────────────────────────────────────────────────────────────────
 
-export function useRpsStore() {
-    const [mode, setMode] = useState<GameMode | null>(null);
-    const [phase, setPhase] = useState<GamePhase>("idle");
-    const [score, setScore] = useState<Score>({ player: 0, opponent: 0 });
-    const [history, setHistory] = useState<Round[]>([]);
-    const [currentRound, setCurrentRound] = useState<Round | null>(null);
-    const [roundNumber, setRoundNumber] = useState(1);
-    const [playerChoice, setPlayerChoice] = useState<Choice | null>(null);
-    const [winnerId, setWinnerId] = useState<"player" | "opponent" | null>(
-        null,
-    );
+type RpsState = {
+    mode: GameMode | null;
+    phase: GamePhase;
+    score: Score;
+    history: Round[];
+    currentRound: Round | null;
+    roundNumber: number;
+    playerChoice: Choice | null;
+    winnerId: "player" | "opponent" | null;
+    rooms: Array<{ id: string; players: number }>;
+    roomId: string | null;
+    isHost: boolean;
+    winsNeeded: number;
+    bestOf: number;
 
-    const startVsCpu = useCallback(() => {
-        setMode("vs-cpu");
-        setPhase("choosing");
-        setScore({ player: 0, opponent: 0 });
-        setHistory([]);
-        setCurrentRound(null);
-        setRoundNumber(1);
-        setPlayerChoice(null);
-        setWinnerId(null);
-    }, []);
+    // Actions
+    startVsCpu: () => void;
+    startOnline: () => void;
+    opponentJoined: () => void;
+    submitChoice: (choice: Choice) => void;
+    resolveOnlineRound: (opponentChoice: Choice) => void;
+    nextRound: () => void;
+    reset: () => void;
+    createRoom: () => void;
+    joinRoom: (id: string) => void;
+    leaveRoom: () => void;
+    startMatch: () => void;
+    getRooms: () => void;
+};
 
-    /**
-     * Online mode: call this to initialise — then wire up your
-     * real-time transport (Supabase, Socket.io, etc.) separately.
-     * When the opponent's choice arrives, call resolveOnlineRound().
-     */
-    const startOnline = useCallback(() => {
-        setMode("online");
-        setPhase("waiting"); // waiting for opponent to connect
-        setScore({ player: 0, opponent: 0 });
-        setHistory([]);
-        setCurrentRound(null);
-        setRoundNumber(1);
-        setPlayerChoice(null);
-        setWinnerId(null);
-    }, []);
+// ── Store ──────────────────────────────────────────────────────────────────
 
-    /** Called by your online transport once the opponent has joined */
-    const opponentJoined = useCallback(() => {
-        setPhase("choosing");
-    }, []);
+export const useRpsStore = create<RpsState>((set, get) => ({
+    mode: null,
+    phase: "idle",
+    score: { player: 0, opponent: 0 },
+    history: [],
+    currentRound: null,
+    roundNumber: 1,
+    playerChoice: null,
+    winnerId: null,
+    rooms: [],
+    roomId: null,
+    isHost: false,
+    winsNeeded: WINS_NEEDED,
+    bestOf: BEST_OF,
 
-    // ── Gameplay ─────────────────────────────────────────────────────────
-
-    const submitChoice = useCallback(
-        (choice: Choice) => {
-            if (phase !== "choosing") return;
-            setPlayerChoice(choice);
-            setPhase("revealing");
-
-            if (mode === "vs-cpu") {
-                // Resolve locally after a short delay
-                setTimeout(() => {
-                    const opponentChoice = randomChoice();
-                    // eslint-disable-next-line react-hooks/immutability
-                    _resolveRound(choice, opponentChoice);
-                }, 900);
-            }
-            // online: wait for resolveOnlineRound() to be called externally
-        },
-        [phase, mode],
-    ); // eslint-disable-line react-hooks/exhaustive-deps
-
-    /**
-     * Call this from your online transport handler when the opponent's
-     * choice comes in (e.g. inside a Supabase channel.on() callback).
-     */
-    const resolveOnlineRound = useCallback((opponentChoice: Choice) => {
-        setPlayerChoice((current) => {
-            if (current) _resolveRound(current, opponentChoice);
-            return current;
+    startVsCpu: () => {
+        set({
+            mode: "vs-cpu",
+            phase: "choosing",
+            score: { player: 0, opponent: 0 },
+            history: [],
+            currentRound: null,
+            roundNumber: 1,
+            playerChoice: null,
+            winnerId: null,
         });
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    },
 
-    // Internal — shared by both modes
-    function _resolveRound(player: Choice, opponent: Choice) {
-        const result = getResult(player, opponent);
+    startOnline: () => {
+        set({
+            mode: "online",
+            phase: "lobby",
+            score: { player: 0, opponent: 0 },
+            history: [],
+            currentRound: null,
+            roundNumber: 1,
+            playerChoice: null,
+            winnerId: null,
+        });
+    },
+
+    opponentJoined: () => {
+        set({ phase: "choosing" });
+    },
+
+    submitChoice: (choice: Choice) => {
+        const state = get();
+        if (state.phase !== "choosing") return;
+
+        set({ playerChoice: choice, phase: "revealing" });
+
+        if (state.mode === "vs-cpu") {
+            setTimeout(() => {
+                const opponentChoice = randomChoice();
+                const result = getResult(choice, opponentChoice);
+
+                const round: Round = {
+                    roundNumber: state.roundNumber,
+                    playerChoice: choice,
+                    opponentChoice,
+                    result,
+                };
+
+                set((prev) => {
+                    const next = {
+                        player: prev.score.player + (result === "win" ? 1 : 0),
+                        opponent:
+                            prev.score.opponent + (result === "lose" ? 1 : 0),
+                    };
+
+                    let newPhase: GamePhase = "round-over";
+                    let newWinnerId: "player" | "opponent" | null = null;
+
+                    if (next.player >= WINS_NEEDED) {
+                        newWinnerId = "player";
+                        newPhase = "game-over";
+                    } else if (next.opponent >= WINS_NEEDED) {
+                        newWinnerId = "opponent";
+                        newPhase = "game-over";
+                    }
+
+                    return {
+                        currentRound: round,
+                        history: [round, ...prev.history].slice(0, 10),
+                        score: next,
+                        winnerId: newWinnerId,
+                        phase: newPhase,
+                    };
+                });
+            }, 900);
+        }
+    },
+
+    resolveOnlineRound: (opponentChoice: Choice) => {
+        const state = get();
+        const playerChoice = state.playerChoice;
+        if (!playerChoice) return;
+
+        const result = getResult(playerChoice, opponentChoice);
 
         const round: Round = {
-            roundNumber,
-            playerChoice: player,
-            opponentChoice: opponent,
+            roundNumber: state.roundNumber,
+            playerChoice,
+            opponentChoice,
             result,
         };
 
-        setCurrentRound(round);
-        setHistory((prev) => [round, ...prev].slice(0, 10));
-
-        setScore((prev) => {
+        set((prev) => {
             const next = {
-                player: prev.player + (result === "win" ? 1 : 0),
-                opponent: prev.opponent + (result === "lose" ? 1 : 0),
+                player: prev.score.player + (result === "win" ? 1 : 0),
+                opponent: prev.score.opponent + (result === "lose" ? 1 : 0),
             };
 
+            let newPhase: GamePhase = "round-over";
+            let newWinnerId: "player" | "opponent" | null = null;
+
             if (next.player >= WINS_NEEDED) {
-                setWinnerId("player");
-                setPhase("game-over");
+                newWinnerId = "player";
+                newPhase = "game-over";
             } else if (next.opponent >= WINS_NEEDED) {
-                setWinnerId("opponent");
-                setPhase("game-over");
-            } else {
-                setPhase("round-over");
+                newWinnerId = "opponent";
+                newPhase = "game-over";
             }
 
-            return next;
+            return {
+                currentRound: round,
+                history: [round, ...prev.history].slice(0, 10),
+                score: next,
+                winnerId: newWinnerId,
+                phase: newPhase,
+            };
         });
-    }
+    },
 
-    const nextRound = useCallback(() => {
-        if (phase !== "round-over") return;
-        setCurrentRound(null);
-        setPlayerChoice(null);
-        setRoundNumber((n) => n + 1);
-        setPhase("choosing");
-    }, [phase]);
+    nextRound: () => {
+        const state = get();
+        if (state.phase !== "round-over") return;
 
-    const reset = useCallback(() => {
-        setMode(null);
-        setPhase("idle");
-        setScore({ player: 0, opponent: 0 });
-        setHistory([]);
-        setCurrentRound(null);
-        setRoundNumber(1);
-        setPlayerChoice(null);
-        setWinnerId(null);
-    }, []);
+        set({
+            currentRound: null,
+            playerChoice: null,
+            roundNumber: state.roundNumber + 1,
+            phase: "choosing",
+        });
+    },
 
-    return {
-        // State
-        mode,
-        phase,
-        score,
-        history,
-        currentRound,
-        roundNumber,
-        playerChoice,
-        winnerId,
-        winsNeeded: WINS_NEEDED,
-        bestOf: BEST_OF,
+    reset: () => {
+        set({
+            mode: null,
+            phase: "idle",
+            score: { player: 0, opponent: 0 },
+            history: [],
+            currentRound: null,
+            roundNumber: 1,
+            playerChoice: null,
+            winnerId: null,
+            roomId: null,
+            isHost: false,
+        });
+    },
 
-        // Actions
-        startVsCpu,
-        startOnline,
-        opponentJoined,
-        submitChoice,
-        resolveOnlineRound,
-        nextRound,
-        reset,
-    };
-}
+    createRoom: () => {
+        const newRoomId = crypto.randomUUID();
+        set({
+            roomId: newRoomId,
+            isHost: true,
+            mode: "online",
+            phase: "room",
+            score: { player: 0, opponent: 0 },
+            history: [],
+            currentRound: null,
+            roundNumber: 1,
+            playerChoice: null,
+            winnerId: null,
+        });
+    },
+
+    joinRoom: (id: string) => {
+        set({
+            roomId: id,
+            isHost: false,
+            mode: "online",
+            phase: "room",
+            score: { player: 0, opponent: 0 },
+            history: [],
+            currentRound: null,
+            roundNumber: 1,
+            playerChoice: null,
+            winnerId: null,
+        });
+    },
+
+    leaveRoom: () => {
+        set({
+            roomId: null,
+            isHost: false,
+            phase: "lobby",
+        });
+    },
+
+    startMatch: () => {
+        const state = get();
+        if (!state.isHost) return;
+        set({ phase: "choosing" });
+    },
+
+    getRooms: () => {
+        set({
+            rooms: [
+                { id: "room-1", players: 1 },
+                { id: "room-2", players: 2 },
+                { id: "room-3", players: 1 },
+            ],
+        });
+    },
+}));

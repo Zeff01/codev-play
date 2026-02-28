@@ -1,6 +1,6 @@
 // cell values
-export type Player = "X" | "O" | "";
-export type Board = ("" | "X" | "O")[];
+import { Board } from "@/types/tictactoe.type";
+import { Player } from "@/types/game.type";
 /**
  * Board Initialization
  * **/

@@ -1,9 +1,13 @@
-import { checkWinner, initializedBoard, isDraw, isValidMove } from "@/utils/game-logic/tictactoe-logic";
+import { checkWinner, initializedBoard, isDraw, isValidMove } from "@/services/tictactoe/tictactoe-logic";
 import { ticTacToeModel } from "@/models/tictactoe.model";
+import { TicTacToeSocket } from "@/sockets/tictactoe.socket";
 import { GameService } from "@/services/game.service";
 
 export class TicTacToeService extends GameService<ticTacToeModel> {
-  constructor(model: ticTacToeModel) {
+  constructor(
+    model: ticTacToeModel,
+    private socket: TicTacToeSocket,
+  ) {
     super(model);
   }
 
@@ -34,6 +38,7 @@ export class TicTacToeService extends GameService<ticTacToeModel> {
       throw new Error("Game has no host (player_x). Create game should set player_x.");
     }
 
+    await this.socket.TicTacToePlayerJoined(game, userId);
     // assign second player as O and start
     return await this.model.updateGameState(gameId, {
       ...game,
@@ -45,7 +50,7 @@ export class TicTacToeService extends GameService<ticTacToeModel> {
   //Game State Manager
   //This manages the flow: current player, applying moves, switching turns:
 
-  async playMove(gameId: string, userId: number | null, row: number, col: number) {
+  async playMove(gameId: string, userId: number, row: number, col: number) {
     const game = await this.model.getGameData(gameId);
     if (!game) throw new Error("Game not found");
 
@@ -89,6 +94,8 @@ export class TicTacToeService extends GameService<ticTacToeModel> {
         winner: null,
       });
     }
+
+    await this.socket.TicTacToePlayerMoved(game, userId);
 
     return await this.model.updateGameState(gameId, {
       board,

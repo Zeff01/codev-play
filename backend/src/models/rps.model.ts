@@ -1,5 +1,5 @@
 import { pool } from "@/config/db";
-import type { RPSType } from "@/utils/rps.logic";
+import type { RPSType } from "@/types/index";
 import { GameModel } from "@/models/game.model";
 
 export class RPSModel extends GameModel {
@@ -39,7 +39,7 @@ export class RPSModel extends GameModel {
       p1_choice = NULL,
       p2_choice = NULL,
       updated_at = NOW()
-    WHERE id = $6,
+    WHERE id = $6
     RETURNING *`,
       [gameData.current_round, gameData.p1_points, gameData.p2_points, gameData.status, gameData.winner, gameId],
     );
@@ -100,22 +100,31 @@ export class RPSModel extends GameModel {
     return result.rows[0];
   }
 
-  async updateChoice(id: string, player: "p1_choice" | "p2_choice", choice: RPSType) {
-    const allowedColumns: Record<typeof player, string> = {
-      p1_choice: "p1_choice",
-      p2_choice: "p2_choice",
-    };
-
-    const column = allowedColumns[player];
-    const result = await pool.query(
-      `UPDATE public.rockpaperscissors
-     SET ${column} = $1, 
-         updated_at = NOW()
-     WHERE id = $2
-     RETURNING *`,
-      [choice, id],
+  async updateChoice(gameId: string, userId: number | null, choice: RPSType) {
+    const gameCheck = await pool.query(
+      `SELECT player_one, player_two 
+     FROM public.rockpaperscissors 
+     WHERE id = $1`,
+      [gameId],
     );
 
+    if (gameCheck.rows.length === 0) {
+      throw new Error("Game not found.");
+    }
+
+    const game = gameCheck.rows[0];
+    const query = `
+  UPDATE public.rockpaperscissors
+  SET ${userId === game.player_one ? "p1_choice" : "p2_choice"} = $1, 
+      updated_at = NOW()
+  WHERE id = $2
+  RETURNING *;
+`;
+
+    console.log("Generated Query:", query); // Log the query
+    console.log("Parameters:", [choice, gameId]); // Log the parameters
+
+    const result = await pool.query(query, [choice, gameId]);
     return result.rows[0];
   }
 

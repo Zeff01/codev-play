@@ -3,7 +3,8 @@ export type RoundResult = "win" | "lose" | "draw";
 export type GameMode = "vs-cpu" | "online";
 export type GamePhase =
     | "idle"
-    | "waiting"
+    | "lobby"
+    | "room"
     | "choosing"
     | "revealing"
     | "round-over"

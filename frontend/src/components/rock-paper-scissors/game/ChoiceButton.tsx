@@ -19,25 +19,27 @@ export default function ChoiceButton({
         <Button
             onClick={onClick}
             disabled={disabled}
+            variant="outline"
             className={`
         w-36 h-36
-        flex flex-col items-center justify-center
-        gap-3
+        flex flex-col items-center justify-center gap-3
         rounded-2xl
-        text-white
         transition-all duration-200
-        hover:scale-105 active:scale-95 cursor-pointer
 
-        ${
-            selected
-                ? "bg-[#4b43a6] ring-2 ring-gray-500"
-                : "bg-[#39327C] hover:bg-[#2f2966]"
-        }
+        hover:scale-105 active:scale-95
 
-        ${disabled ? "opacity-50 cursor-not-allowed" : ""}
+        ${selected ? "ring-2 ring-primary scale-105" : ""}
+
+        ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+
+        dark:bg-[#39327C]
+        dark:hover:bg-[#2f2966]
+        dark:border-purple-400/30
+        dark:text-purple-200
       `}
         >
-            {icon}
+            <div className="text-foreground dark:text-purple-200">{icon}</div>
+
             <span className="text-base font-semibold">{label}</span>
         </Button>
     );
