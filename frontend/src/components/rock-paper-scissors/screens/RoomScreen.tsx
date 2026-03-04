@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRpsStore } from "@/store/useRpsStore";
+import { useSocketContext } from "@/context/SocketContext";
 import {
     Card,
     CardHeader,
@@ -13,7 +15,29 @@ import { Button } from "@/components/ui/button";
 import { DoorOpen, Play } from "lucide-react";
 
 export default function RoomScreen() {
-    const { roomId, isHost, startMatch, leaveRoom } = useRpsStore();
+    const {
+        roomId,
+        isHost,
+        hasOpponent,
+        startMatch,
+        leaveRoom,
+        opponentJoined,
+    } = useRpsStore();
+    const { socket } = useSocketContext();
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handlePlayerJoined = () => {
+            opponentJoined();
+        };
+
+        socket.on("player:joined", handlePlayerJoined);
+
+        return () => {
+            socket.off("player:joined", handlePlayerJoined);
+        };
+    }, [socket, opponentJoined]);
 
     return (
         <main className="min-h-screen flex items-center justify-center p-6 bg-background text-foreground">
@@ -31,7 +55,9 @@ export default function RoomScreen() {
 
                         <p className="text-sm text-muted-foreground dark:text-purple-200 mt-2">
                             {isHost
-                                ? "Waiting for opponent to join..."
+                                ? hasOpponent
+                                    ? "Opponent joined – you can start the game"
+                                    : "Waiting for opponent to join..."
                                 : "Waiting for host to start game..."}
                         </p>
                     </div>
@@ -40,6 +66,7 @@ export default function RoomScreen() {
                         <Button
                             onClick={startMatch}
                             className="w-full font-semibold"
+                            disabled={!hasOpponent}
                         >
                             <Play className="mr-2 h-4 w-4" />
                             Start Game

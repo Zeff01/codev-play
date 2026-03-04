@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import type { Socket } from "socket.io-client";
 import type {
     Choice,
     RoundResult,
@@ -32,6 +33,30 @@ function getResult(player: Choice, opponent: Choice): RoundResult {
 const BEST_OF = 5;
 const WINS_NEEDED = Math.ceil(BEST_OF / 2); // 3
 
+// ── Socket Event Types ──────────────────────────────────────────────────────
+
+type RoomData = {
+    id: string;
+    name: string;
+    playerCount: number;
+    players: string[];
+    createdAt: Date;
+    gameType?: string;
+    gameId?: string;
+};
+
+type RoomEventData = {
+    success: boolean;
+    room: RoomData;
+};
+
+type PlayerJoinedData = {
+    playerId: string;
+    room: RoomData;
+};
+
+type RoomsListData = RoomData[];
+
 // ── Types ──────────────────────────────────────────────────────────────────
 
 type RpsState = {
@@ -43,16 +68,18 @@ type RpsState = {
     roundNumber: number;
     playerChoice: Choice | null;
     winnerId: "player" | "opponent" | null;
-    rooms: Array<{ id: string; players: number }>;
+    rooms: Array<{ id: string; players: number; gameType?: string }>;
     roomId: string | null;
     isHost: boolean;
+    hasOpponent: boolean;
     winsNeeded: number;
     bestOf: number;
+    socket: Socket | null;
 
     // Actions
     startVsCpu: () => void;
     startOnline: () => void;
-    opponentJoined: () => void;
+    opponentJoined: () => void; // mark opponent presence
     submitChoice: (choice: Choice) => void;
     resolveOnlineRound: (opponentChoice: Choice) => void;
     nextRound: () => void;
@@ -62,6 +89,10 @@ type RpsState = {
     leaveRoom: () => void;
     startMatch: () => void;
     getRooms: () => void;
+    setSocket: (socket: Socket) => void;
+    updateRooms: (
+        rooms: Array<{ id: string; players: number; gameType?: string }>,
+    ) => void;
 };
 
 // ── Store ──────────────────────────────────────────────────────────────────
@@ -78,8 +109,10 @@ export const useRpsStore = create<RpsState>((set, get) => ({
     rooms: [],
     roomId: null,
     isHost: false,
+    hasOpponent: false,
     winsNeeded: WINS_NEEDED,
     bestOf: BEST_OF,
+    socket: null,
 
     startVsCpu: () => {
         set({
@@ -108,7 +141,8 @@ export const useRpsStore = create<RpsState>((set, get) => ({
     },
 
     opponentJoined: () => {
-        set({ phase: "choosing" });
+        // mark that another player is in the room, host can now start
+        set({ hasOpponent: true });
     },
 
     submitChoice: (choice: Choice) => {
@@ -224,41 +258,41 @@ export const useRpsStore = create<RpsState>((set, get) => ({
             winnerId: null,
             roomId: null,
             isHost: false,
+            hasOpponent: false,
         });
     },
 
     createRoom: () => {
-        const newRoomId = crypto.randomUUID();
-        set({
-            roomId: newRoomId,
-            isHost: true,
-            mode: "online",
-            phase: "room",
-            score: { player: 0, opponent: 0 },
-            history: [],
-            currentRound: null,
-            roundNumber: 1,
-            playerChoice: null,
-            winnerId: null,
-        });
+        const socket = get().socket;
+        if (!socket) {
+            console.warn("Socket not connected");
+            return;
+        }
+
+        set({ hasOpponent: false });
+        socket.emit("room:create", { gameType: "rps" });
     },
 
     joinRoom: (id: string) => {
-        set({
-            roomId: id,
-            isHost: false,
-            mode: "online",
-            phase: "room",
-            score: { player: 0, opponent: 0 },
-            history: [],
-            currentRound: null,
-            roundNumber: 1,
-            playerChoice: null,
-            winnerId: null,
-        });
+        const socket = get().socket;
+        if (!socket) {
+            console.warn("Socket not connected");
+            return;
+        }
+
+        set({ hasOpponent: true }); // joining implies another player (host) is present
+        socket.emit("room:join", { roomId: id });
     },
 
     leaveRoom: () => {
+        const socket = get().socket;
+        const roomId = get().roomId;
+        if (!socket || !roomId) {
+            console.warn("Socket not connected or no room to leave");
+            return;
+        }
+
+        socket.emit("room:leave", { roomId });
         set({
             roomId: null,
             isHost: false,
@@ -266,19 +300,83 @@ export const useRpsStore = create<RpsState>((set, get) => ({
         });
     },
 
-    startMatch: () => {
-        const state = get();
-        if (!state.isHost) return;
-        set({ phase: "choosing" });
+    getRooms: () => {
+        const socket = get().socket;
+        if (!socket) {
+            console.warn("Socket not connected");
+            return;
+        }
+
+        socket.emit("rooms:get");
     },
 
-    getRooms: () => {
-        set({
-            rooms: [
-                { id: "room-1", players: 1 },
-                { id: "room-2", players: 2 },
-                { id: "room-3", players: 1 },
-            ],
+    setSocket: (socket: Socket) => {
+        set({ socket });
+
+        // Listen for room creation
+        socket.on("room:created", (data: RoomEventData) => {
+            if (data.success) {
+                set({
+                    roomId: data.room.id,
+                    isHost: true,
+                    mode: "online",
+                    phase: "room",
+                });
+            }
         });
+
+        // Listen for room join
+        socket.on("room:joined", (data: RoomEventData) => {
+            if (data.success) {
+                set({
+                    roomId: data.room.id,
+                    isHost: false,
+                    mode: "online",
+                    phase: "room",
+                });
+            }
+        });
+
+        // Listen for player joined event
+        socket.on("player:joined", (data: PlayerJoinedData) => {
+            console.log("Player joined room:", data);
+            // host learns that opponent arrived
+            get().opponentJoined();
+        });
+
+        // Listen for rooms list update
+        socket.on("rooms:list", (rooms: RoomsListData) => {
+            const formattedRooms = rooms.map((room) => ({
+                id: room.id,
+                players: room.playerCount,
+                gameType: room.gameType,
+            }));
+            set({ rooms: formattedRooms });
+        });
+
+        // match start event
+        socket.on("match:started", () => {
+            set({ phase: "choosing" });
+        });
+        // Listen for errors
+        socket.on("room:error", (data: { message: string }) => {
+            console.error("Room error:", data.message);
+        });
+    },
+
+    updateRooms: (
+        rooms: Array<{ id: string; players: number; gameType?: string }>,
+    ) => {
+        set({ rooms });
+    },
+
+    startMatch: () => {
+        const state = get();
+        if (!state.isHost || !state.roomId) return;
+        const socket = state.socket;
+        if (socket) {
+            socket.emit("room:start", { roomId: state.roomId });
+        }
+        // actual phase change will happen when server broadcasts match:started
     },
 }));

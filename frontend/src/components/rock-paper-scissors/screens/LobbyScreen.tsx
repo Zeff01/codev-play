@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRpsStore } from "@/store/useRpsStore";
+import { useSocketContext } from "@/context/SocketContext";
 import { ArrowLeft } from "lucide-react";
 import {
     Card,
@@ -15,11 +16,16 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function LobbyScreen() {
-    const { rooms, getRooms, createRoom, joinRoom, reset } = useRpsStore();
+    const { rooms, getRooms, createRoom, joinRoom, reset, setSocket } =
+        useRpsStore();
+    const { socket, isConnected } = useSocketContext();
 
     useEffect(() => {
-        getRooms();
-    }, [getRooms]);
+        if (socket && isConnected) {
+            setSocket(socket);
+            getRooms();
+        }
+    }, [socket, isConnected, setSocket, getRooms]);
 
     return (
         <main className="min-h-screen flex items-start justify-center p-6 bg-background">
