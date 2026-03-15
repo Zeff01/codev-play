@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { Round, Score, GameMode } from "@/types/rps";
+import { Round, Score, GameMode, Choice } from "@/types/rps";
 import {
     FaRegHandRock,
     FaRegHandPaper,
@@ -9,7 +8,7 @@ import {
 } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 
-const ICONS = {
+const ICONS: Record<Choice, React.ComponentType<{ className?: string }>> = {
     rock: FaRegHandRock,
     paper: FaRegHandPaper,
     scissors: FaRegHandScissors,
@@ -40,30 +39,29 @@ export default function ScoreBoard({
 }: Props) {
     if (!mode) return null;
 
-    const total = score.player + score.opponent;
-    const pct = total === 0 ? 50 : Math.round((score.player / total) * 100);
-    const opponent = mode === "online" ? "Opponent" : "CPU";
+    const totalRounds = score.player + score.opponent;
+    const percent =
+        totalRounds === 0 ? 50 : Math.round((score.player / totalRounds) * 100);
+
+    const opponentLabel = mode === "online" ? "Opponent" : "CPU";
 
     return (
         <div className="flex flex-col items-center gap-6 w-full max-w-md">
-            {/* Score Card */}
-            <div className="w-full rounded-2xl border bg-card      dark:bg-[#39327C] text-card-foreground shadow-sm p-5">
+            <div className="w-full rounded-2xl border bg-card dark:bg-[#39327C] text-card-foreground shadow-sm p-5">
                 <ScoreHeader
                     player={score.player}
                     opponent={score.opponent}
-                    opponentLabel={opponent}
+                    opponentLabel={opponentLabel}
                     winsNeeded={winsNeeded}
                     bestOf={bestOf}
                     rounds={history.length}
                 />
 
-                <ProgressBar percent={pct} opponent={opponent} />
+                <ProgressBar percent={percent} opponent={opponentLabel} />
             </div>
 
-            {/* History */}
             {history.length > 0 && <HistoryList history={history} />}
 
-            {/* Reset */}
             {history.length > 0 && (
                 <Button variant="ghost" size="sm" onClick={onReset}>
                     Reset game
@@ -72,8 +70,6 @@ export default function ScoreBoard({
         </div>
     );
 }
-
-/* ================= HEADER ================= */
 
 function ScoreHeader({
     player,
@@ -112,8 +108,6 @@ function ScoreHeader({
     );
 }
 
-/* ================= SCORE BLOCK ================= */
-
 function ScoreBlock({
     label,
     score,
@@ -137,8 +131,6 @@ function ScoreBlock({
         </div>
     );
 }
-
-/* ================= PROGRESS BAR ================= */
 
 function ProgressBar({
     percent,
@@ -166,8 +158,6 @@ function ProgressBar({
     );
 }
 
-/* ================= HISTORY ================= */
-
 function HistoryList({ history }: { history: Round[] }) {
     return (
         <div className="w-full">
@@ -177,37 +167,30 @@ function HistoryList({ history }: { history: Round[] }) {
 
             <div className="flex flex-col gap-2">
                 {history.map((round, i) => {
-                    const IconLeft = ICONS[round.playerChoice];
-                    const IconRight = ICONS[round.opponentChoice];
+                    const PlayerIcon = ICONS[round.playerChoice];
+                    const OpponentIcon = ICONS[round.opponentChoice];
 
                     return (
                         <div
                             key={round.roundNumber}
-                            className={`flex items-center justify-between rounded-xl border bg-muted/40 px-4 py-2 animate-in fade-in slide-in-from-top-2 duration-300`}
+                            className="flex items-center justify-between rounded-xl border bg-muted/40 px-4 py-2 animate-in fade-in slide-in-from-top-2 duration-300"
                             style={{ opacity: Math.max(0.35, 1 - i * 0.08) }}
                         >
-                            {/* Left */}
                             <div className="flex items-center gap-3">
-                                <span
-                                    className={`text-[10px] font-bold w-5 h-5 rounded border flex items-center justify-center ${BADGE[round.result]}`}
-                                >
-                                    {round.result[0].toUpperCase()}
-                                </span>
+                                <ResultBadge result={round.result} />
 
                                 <ChoiceIcon
-                                    Icon={IconLeft}
+                                    Icon={PlayerIcon}
                                     label={round.playerChoice}
                                 />
                             </div>
 
-                            {/* Round number */}
                             <span className="text-xs text-muted-foreground">
                                 R{round.roundNumber}
                             </span>
 
-                            {/* Right */}
                             <ChoiceIcon
-                                Icon={IconRight}
+                                Icon={OpponentIcon}
                                 label={round.opponentChoice}
                             />
                         </div>
@@ -218,17 +201,25 @@ function HistoryList({ history }: { history: Round[] }) {
     );
 }
 
-/* ================= ICON ================= */
+function ResultBadge({ result }: { result: keyof typeof BADGE }) {
+    return (
+        <span
+            className={`text-[10px] font-bold w-5 h-5 rounded border flex items-center justify-center ${BADGE[result]}`}
+        >
+            {result[0].toUpperCase()}
+        </span>
+    );
+}
 
 function ChoiceIcon({
     Icon,
     label,
 }: {
-    Icon: React.ComponentType<any>;
+    Icon: React.ComponentType<{ className?: string }>;
     label: string;
 }) {
     return (
-        <span className="text-sm flex flex-col items-center gap-1">
+        <span className="flex flex-col items-center gap-1 text-sm">
             <Icon className="w-4 h-4" />
             <span className="text-xs text-muted-foreground capitalize">
                 {label}

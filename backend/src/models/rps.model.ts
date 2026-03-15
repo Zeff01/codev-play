@@ -64,13 +64,26 @@ export class RPSModel extends GameModel {
       p2_points = 0,
       p1_choice = NULL,
       p2_choice = NULL,
-      status = 'IN_PROGRESS',
+      status = 'IN PROGRESS',
       winner = NULL,
       updated_at = NOW()
     WHERE id = $1 RETURNING *`,
       [gameId],
     );
     return result.rows[0];
+  }
+
+  async handleRematchRequest(gameId: string, currentGame: any) {
+    if (currentGame.status === "FINISHED") {
+      const result = await pool.query(
+        `UPDATE public.rockpaperscissors SET status = 'WAITING' WHERE id = $1 RETURNING *`,
+        [gameId],
+      );
+      return result.rows[0];
+    } else if (currentGame.status === "WAITING") {
+      const newGame = await this.resetGame(gameId);
+      return newGame;
+    }
   }
 
   async getActiveGames() {
@@ -140,9 +153,10 @@ export class RPSModel extends GameModel {
 
   async resetChoices(gameId: string) {
     const result = await pool.query(
-      `UPDATE public.rockpaperscissors SET p1_choice = null, p2_choice = null, updated_at = NOW()
+      `UPDATE public.rockpaperscissors SET p1_choice = null, p2_chouce = null, updated_at = NOW()
         WHERE id = $1`,
       [gameId],
     );
+    return result.rows[0];
   }
 }

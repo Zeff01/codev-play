@@ -1,5 +1,7 @@
 "use client";
 
+import { useParams } from "next/navigation";
+import { useEffect } from "react";
 import { useRpsStore } from "@/store/rps/useRpsStore";
 import ChoiceSection from "@/components/rock-paper-scissors/game/ChoiceSection";
 import ResultDisplay from "@/components/rock-paper-scissors/game/ResultDisplay";
@@ -8,11 +10,47 @@ import ScoreBoard from "@/components/rock-paper-scissors/game/ScoreBoard";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bot, Users } from "lucide-react";
+import { useGameTimer } from "@/hooks/rps/useGameTimer";
 
 export default function GameScreen() {
-    const game = useRpsStore();
+    const params = useParams();
+    const gameId = params?.gameId as string;
 
-    const isOnline = game.mode === "online";
+    const {
+        phase,
+        playerChoice,
+        submitChoice,
+        currentRound,
+        winnerId,
+        nextRound,
+        reset,
+        bestOf,
+        mode,
+        score,
+        history,
+        winsNeeded,
+        startVsCpu,
+        roomId,
+        setRoomId,
+        timer,
+    } = useRpsStore();
+
+    const isOnline = gameId !== "cpu";
+
+    useEffect(() => {
+        if (!gameId) return;
+
+        if (gameId === "cpu" && phase === "idle") {
+            startVsCpu();
+            return;
+        }
+
+        if (gameId !== "cpu" && roomId !== gameId) {
+            setRoomId(gameId);
+        }
+    }, [gameId, phase, roomId, startVsCpu, setRoomId]);
+
+    useGameTimer();
 
     return (
         <main className="min-h-screen flex items-center justify-center p-6 bg-background text-foreground">
@@ -44,28 +82,29 @@ export default function GameScreen() {
 
                 <CardContent className="space-y-8 flex items-center flex-col">
                     <ChoiceSection
-                        phase={game.phase}
-                        playerChoice={game.playerChoice}
-                        onChoice={game.submitChoice}
+                        phase={phase}
+                        playerChoice={playerChoice}
+                        onChoice={submitChoice}
+                        timer={timer}
                     />
 
                     <ResultDisplay
-                        phase={game.phase}
-                        currentRound={game.currentRound}
-                        winnerId={game.winnerId}
-                        onNextRound={game.nextRound}
-                        onReset={game.reset}
-                        bestOf={game.bestOf}
-                        mode={game.mode}
+                        phase={phase}
+                        currentRound={currentRound}
+                        winnerId={winnerId}
+                        onNextRound={nextRound}
+                        onReset={reset}
+                        bestOf={bestOf}
+                        mode={mode}
                     />
 
                     <ScoreBoard
-                        score={game.score}
-                        history={game.history}
-                        mode={game.mode}
-                        winsNeeded={game.winsNeeded}
-                        bestOf={game.bestOf}
-                        onReset={game.reset}
+                        score={score}
+                        history={history}
+                        mode={mode}
+                        winsNeeded={winsNeeded}
+                        bestOf={bestOf}
+                        onReset={reset}
                     />
                 </CardContent>
             </Card>

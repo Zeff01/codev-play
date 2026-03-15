@@ -6,7 +6,7 @@ export class GameController<T extends GameService<any>> {
 
   async createGameController(req: Request, res: Response) {
     try {
-      const Id = Number(req.user?.id);
+      const Id = Number(req.body.user?.id);
       if (!Id || Number.isNaN(Id)) {
         return res.status(401).json({ error: "Invalid user ID" });
       }
@@ -26,7 +26,7 @@ export class GameController<T extends GameService<any>> {
 
   async joinGameController(req: Request, res: Response) {
     try {
-      const userId = Number(req.user!.id); //ensure to match the int type on db
+      const userId = req.body.user!.id;
       const gameId = String(req.params!.gameId);
 
       const game = await this.service.joinGame(gameId, userId);
@@ -53,7 +53,17 @@ export class GameController<T extends GameService<any>> {
     res: Response,
   ): Promise<void> {
     try {
-      const game = await this.service.resetExistingGame(req.params.gameId);
+      const userId = req.user?.id || req.body.user?.id;
+
+      if (!userId) {
+        res.status(400).json({ error: "User identity required for rematch." });
+        return;
+      }
+
+      const gameId = req.params.gameId;
+
+      const game = await this.service.resetExistingGame(gameId, Number(userId));
+
       res.json(game);
     } catch (err) {
       const error = err as Error;
@@ -71,3 +81,28 @@ export class GameController<T extends GameService<any>> {
     }
   }
 }
+
+/*export class GameService<T extends GameModel<any>> {
+  constructor(protected model: T) {}
+
+  async startGame(gameData: any, userId: number) {
+    return await this.model.createGame(gameData, userId);
+  }
+
+  async fetchGame(gameId: string) {
+    const game = await this.model.getGameData(gameId);
+    if (!game) throw new Error("Game not found");
+    return game;
+  }
+
+  async resetExistingGame(gameId: string, gameData?: any) {
+    const game = await this.model.getGameData(gameId);
+    if (!game) throw new Error("Game not found");
+    return this.model.resetGame(gameId);
+  }
+
+  async listActiveGames() {
+    return await this.model.getActiveGames();
+  }
+}
+ */

@@ -1,12 +1,20 @@
 "use client";
 
-import { useRpsStore } from "@/store/rps/useRpsStore";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bot, Globe } from "lucide-react";
 
 export default function IdleScreen() {
-    const { startVsCpu, startOnline } = useRpsStore();
+    const router = useRouter();
+
+    const startVsCpu = () => {
+        router.push("/rps/game/cpu");
+    };
+
+    const startOnline = () => {
+        router.push("/rps/lobby");
+    };
 
     return (
         <main className="min-h-screen flex flex-col items-center justify-start gap-10 p-6 lg:pt-24 bg-background text-foreground">
@@ -23,7 +31,7 @@ export default function IdleScreen() {
                 <Card
                     onClick={startVsCpu}
                     className="cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-xl border-border
-         					 dark:bg-[#39327C] dark:border-purple-400/30 dark:hover:bg-[#4b43a6]"
+          dark:bg-[#39327C] dark:border-purple-400/30 dark:hover:bg-[#4b43a6]"
                 >
                     <CardContent className="flex flex-col items-center justify-center gap-3 w-40 h-40 text-center">
                         <Bot className="w-10 h-10 text-primary" />
@@ -39,7 +47,7 @@ export default function IdleScreen() {
                 <Card
                     onClick={startOnline}
                     className="cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-xl border-border
-       					   dark:bg-[#39327C] dark:border-purple-400/30 dark:hover:bg-[#4b43a6]"
+          dark:bg-[#39327C] dark:border-purple-400/30 dark:hover:bg-[#4b43a6]"
                 >
                     <CardContent className="flex flex-col items-center justify-center gap-3 w-40 h-40 text-center">
                         <Globe className="w-10 h-10 text-primary" />

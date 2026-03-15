@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useRpsStore } from "@/store/rps/useRpsStore";
 import {
     Card,
@@ -13,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { DoorOpen, Play } from "lucide-react";
 
 export default function RoomScreen() {
+    const router = useRouter();
+
     const { roomId, roomName, isHost, hasOpponent, startMatch, leaveRoom } =
         useRpsStore();
 
@@ -43,7 +46,12 @@ export default function RoomScreen() {
 
                     {isHost && (
                         <Button
-                            onClick={startMatch}
+                            onClick={() => {
+                                startMatch();
+                                if (roomId) {
+                                    router.push(`/rps/game/${roomId}`);
+                                }
+                            }}
                             className="w-full font-semibold"
                             disabled={!hasOpponent}
                         >
@@ -55,7 +63,10 @@ export default function RoomScreen() {
 
                 <CardFooter>
                     <Button
-                        onClick={leaveRoom}
+                        onClick={() => {
+                            leaveRoom();
+                            router.push("/rps/lobby");
+                        }}
                         variant="secondary"
                         className="w-full"
                     >

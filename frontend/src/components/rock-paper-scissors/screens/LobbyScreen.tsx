@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRpsStore } from "@/store/rps/useRpsStore";
 import { useSocketContext } from "@/context/SocketContext";
@@ -16,8 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default function LobbyScreen() {
+    const router = useRouter();
     const [roomName, setRoomName] = useState("");
-    const { rooms, getRooms, createRoom, joinRoom, reset, setSocket } =
+    const { rooms, roomId, getRooms, createRoom, joinRoom, setSocket } =
         useRpsStore();
     const { socket, isConnected } = useSocketContext();
 
@@ -28,12 +30,18 @@ export default function LobbyScreen() {
         }
     }, [socket, isConnected, setSocket, getRooms]);
 
+    useEffect(() => {
+        if (roomId) {
+            router.push(`/rps/room/${roomId}`);
+        }
+    }, [roomId, router]);
+
     return (
         <main className="min-h-screen flex items-start justify-center p-6 bg-background">
-            <Card className="w-full max-w-7xl">
+            <div className="w-full max-w-7xl">
                 <div className="p-4 pb-0">
                     <Button
-                        onClick={reset}
+                        onClick={() => router.push("/rps")}
                         variant="secondary"
                         className="flex items-center gap-2"
                     >
@@ -59,7 +67,6 @@ export default function LobbyScreen() {
                                 createRoom(roomName);
                                 setRoomName("");
                             }}
-                            size="lg"
                             disabled={!roomName.trim()}
                         >
                             Create Room
@@ -113,7 +120,7 @@ export default function LobbyScreen() {
                         )}
                     </section>
                 </CardContent>
-            </Card>
+            </div>
         </main>
     );
 }

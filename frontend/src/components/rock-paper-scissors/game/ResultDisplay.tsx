@@ -5,7 +5,7 @@ import {
     FaRegHandPaper,
     FaRegHandScissors,
 } from "react-icons/fa";
-
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Choice, GamePhase, Round, RoundResult } from "@/types/rps";
 
@@ -55,7 +55,7 @@ export default function ResultDisplay({
     bestOf,
     mode,
 }: Props) {
-    /* ---------------- WAITING / REVEALING ---------------- */
+    const router = useRouter();
 
     if (phase === "revealing") {
         return (
@@ -70,8 +70,6 @@ export default function ResultDisplay({
         );
     }
 
-    /* ---------------- IDLE ---------------- */
-
     if (phase === "idle" || phase === "choosing" || !currentRound) {
         return (
             <CenteredContainer>
@@ -82,21 +80,19 @@ export default function ResultDisplay({
         );
     }
 
-    /* ---------------- GAME OVER ---------------- */
-
     if (phase === "game-over") {
-        const isPlayerWinner = winnerId === "player";
+        const playerWon = winnerId === "player";
 
         return (
             <CenteredContainer animate>
                 <p
-                    className={`text-3xl font-black tracking-tight ${
-                        isPlayerWinner
+                    className={`text-3xl p-2 rounded font-black tracking-tight ${
+                        playerWon
                             ? "text-yellow-500 shadow-[0_0_18px_rgba(250,204,21,0.6)]"
                             : "text-rose-500"
                     }`}
                 >
-                    {isPlayerWinner
+                    {playerWon
                         ? "🏆 You win the match!"
                         : "💀 You lost the match"}
                 </p>
@@ -105,35 +101,38 @@ export default function ResultDisplay({
                     Best of {bestOf} — match complete
                 </p>
 
-                <Button variant="ghost" size="sm" onClick={onReset}>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                        onReset();
+
+                        if (mode === "vs-cpu") {
+                            router.replace("/rps/game/cpu");
+                        } else {
+                            router.replace("/rps");
+                        }
+                    }}
+                >
                     Play again
                 </Button>
             </CenteredContainer>
         );
     }
 
-    /* ---------------- ROUND RESULT ---------------- */
-
     const result = RESULT_CONFIG[currentRound.result];
 
     return (
         <CenteredContainer animate>
             <div className="flex items-center gap-12">
-                {/* Player */}
                 <PlayerBlock
                     label="You"
                     choice={currentRound.playerChoice}
                     highlight={currentRound.result === "win"}
                 />
 
-                {/* Result */}
-                <span
-                    className={`text-2xl font-black tracking-tight ${result.color} ${result.glow}`}
-                >
-                    {result.label}
-                </span>
+                <ResultText result={result} />
 
-                {/* Opponent */}
                 <PlayerBlock
                     label={mode === "online" ? "Opponent" : "CPU"}
                     choice={currentRound.opponentChoice}
@@ -148,18 +147,16 @@ export default function ResultDisplay({
     );
 }
 
-/* ================= SUB COMPONENTS ================= */
-
 function CenteredContainer({
     children,
-    animate,
+    animate = false,
 }: {
     children: React.ReactNode;
     animate?: boolean;
 }) {
     return (
         <div
-            className={`flex flex-col items-center gap-4 h-36 justify-center ${
+            className={`flex flex-col items-center justify-center gap-4 h-36 ${
                 animate
                     ? "animate-in fade-in slide-in-from-bottom-2 duration-300"
                     : ""
@@ -170,10 +167,24 @@ function CenteredContainer({
     );
 }
 
+function ResultText({
+    result,
+}: {
+    result: { label: string; color: string; glow: string };
+}) {
+    return (
+        <span
+            className={`text-2xl p-2 rounded font-black tracking-tight ${result.color} ${result.glow}`}
+        >
+            {result.label}
+        </span>
+    );
+}
+
 function PlayerBlock({
     label,
     choice,
-    highlight,
+    highlight = false,
 }: {
     label: string;
     choice: Choice;
@@ -187,7 +198,7 @@ function PlayerBlock({
 
             <div
                 className={`text-foreground dark:text-purple-200 ${
-                    highlight ? "shadow-[0_0_18px_rgba(168,85,247,0.4)]" : ""
+                    highlight ? "" : ""
                 }`}
             >
                 {ICONS[choice]}

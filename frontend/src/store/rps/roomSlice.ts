@@ -1,15 +1,20 @@
 import type { StateCreator } from "zustand";
 import type { RpsStore } from "./store.types";
 
+type LobbyRoom = {
+    id: string;
+    name: string;
+    players: number;
+    gameType?: string;
+};
+
 export type RoomSlice = {
-    rooms: Array<{
-        id: string;
-        name: string;
-        players: number;
-        gameType?: string;
-    }>;
+    rooms: LobbyRoom[];
     roomId: string | null;
     roomName: string | null;
+
+    setRoomId: (id: string | null) => void;
+
     isHost: boolean;
     hasOpponent: boolean;
 
@@ -19,14 +24,7 @@ export type RoomSlice = {
     leaveRoom: () => void;
     startMatch: () => void;
     getRooms: () => void;
-    updateRooms: (
-        rooms: Array<{
-            id: string;
-            name: string;
-            players: number;
-            gameType?: string;
-        }>,
-    ) => void;
+    updateRooms: (rooms: LobbyRoom[]) => void;
 };
 
 export const createRoomSlice: StateCreator<RpsStore, [], [], RoomSlice> = (
@@ -36,6 +34,7 @@ export const createRoomSlice: StateCreator<RpsStore, [], [], RoomSlice> = (
     rooms: [],
     roomId: null,
     roomName: null,
+    setRoomId: (id) => set({ roomId: id }),
     isHost: false,
     hasOpponent: false,
 
@@ -67,7 +66,7 @@ export const createRoomSlice: StateCreator<RpsStore, [], [], RoomSlice> = (
         if (!socket || !roomId)
             return console.warn("Socket not connected or no room");
         socket.emit("room:leave", { roomId });
-        set({ roomId: null, roomName: null, isHost: false, phase: "lobby" });
+        set({ roomId: null, roomName: null, isHost: false });
     },
 
     startMatch: () => {

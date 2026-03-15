@@ -11,14 +11,14 @@ import {
 import { ApiResponse } from "@/utils/api-response";
 import AppError from "@/middleware/app-error";
 
-interface registerBody {
+interface RegisterBody {
     email: string;
     username: string;
     password: string;
 }
 
 export const register = async (
-    req: Request<{}, {}, registerBody>,
+    req: Request<{}, {}, RegisterBody>,
     res: Response,
     next: NextFunction,
 ) => {

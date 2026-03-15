@@ -15,28 +15,37 @@ export const createSocketSlice: StateCreator<RpsStore, [], [], SocketSlice> = (
     socket: null,
 
     setSocket: (socket) => {
+        if (!socket) {
+            set({ socket: null });
+            return;
+        }
+
+        socket.removeAllListeners();
+
         set({ socket });
 
         socket.on("room:created", (data: RoomEventData) => {
-            if (data.success)
-                set({
-                    roomId: data.room.id,
-                    roomName: data.room.name,
-                    isHost: true,
-                    mode: "online",
-                    phase: "room",
-                });
+            if (!data.success) return;
+
+            set({
+                roomId: data.room.id,
+                roomName: data.room.name,
+                isHost: true,
+                mode: "online",
+                phase: "room",
+            });
         });
 
         socket.on("room:joined", (data: RoomEventData) => {
-            if (data.success)
-                set({
-                    roomId: data.room.id,
-                    roomName: data.room.name,
-                    isHost: false,
-                    mode: "online",
-                    phase: "room",
-                });
+            if (!data.success) return;
+
+            set({
+                roomId: data.room.id,
+                roomName: data.room.name,
+                isHost: false,
+                mode: "online",
+                phase: "room",
+            });
         });
 
         socket.on("player:joined", (data: PlayerJoinedData) => {
@@ -55,7 +64,9 @@ export const createSocketSlice: StateCreator<RpsStore, [], [], SocketSlice> = (
             );
         });
 
-        socket.on("match:started", () => set({ phase: "choosing" }));
+        socket.on("match:started", () => {
+            set({ phase: "choosing" });
+        });
 
         socket.on("room:error", (data: { message: string }) => {
             console.error("Room error:", data.message);

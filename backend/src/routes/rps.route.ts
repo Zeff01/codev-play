@@ -7,7 +7,7 @@ import { auth } from "../middleware/auth.middleware";
 
 const router = Router();
 const controller = new RPSController(
-  new RockPaperScissorsService(new RPSModel()),
+  new RockPaperScissorsService(new RPSModel(), new RPSSocket()),
 );
 
 router.post("/create", auth, controller.createGameController.bind(controller));
@@ -32,9 +32,10 @@ router.post(
   auth,
   controller.resetGameController.bind(controller),
 );
-router.get(
+
+/*router.get(
   "/:gameId/history",
   auth,
   controller.getHistoryController.bind(controller),
-);
+);*/
 export default router;

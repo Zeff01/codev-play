@@ -23,7 +23,7 @@ const navItems = [
     { label: "Pac-Man", href: "/pacman", icon: Gamepad2 },
     {
         label: "Rock Paper Scissors",
-        href: "/rock-paper-scissors",
+        href: "/rps",
         icon: Hand,
     },
     { label: "Chess", href: "/chess", icon: Crown },

@@ -87,19 +87,19 @@ This document contains step-by-step tasks for implementing the backend API for C
 
 ### TASK-B202: Rock Paper Scissors API Endpoints
 
-- [ ] POST /api/games/rps/create - Create new game
-- [ ] POST /api/games/rps/:gameId/join - Join game
-- [ ] POST /api/games/rps/:gameId/choice - Submit choice
-- [ ] GET /api/games/rps/:gameId - Get game state
-- [ ] GET /api/games/rps/:gameId/history - Get round history
+- [x] POST /api/games/rps/create - Create new game
+- [x] POST /api/games/rps/:gameId/join - Join game
+- [x] POST /api/games/rps/:gameId/choice - Submit choice
+- [x] GET /api/games/rps/:gameId - Get game state
+- [x] GET /api/games/rps/:gameId/history - Get round history
 
 ### TASK-B203: Rock Paper Scissors Real-time Features
 
-- [ ] Setup matchmaking socket events
-- [ ] Emit choice submission (hidden)
-- [ ] Reveal both choices simultaneously
-- [ ] Broadcast round results
-- [ ] Handle rematch requests
+- [x] Setup matchmaking socket events
+- [x] Emit choice submission (hidden)
+- [x] Reveal both choices simultaneously
+- [x] Broadcast round results
+- [x] Handle rematch requests
 
 ## Game: Snake
 

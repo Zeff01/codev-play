@@ -30,12 +30,11 @@ export type BaseGameState = {
 export const BEST_OF = 5;
 export const WINS_NEEDED = Math.ceil(BEST_OF / 2);
 
-// Socket event payloads
 export type RoomData = {
     id: string;
     name: string;
     playerCount: number;
-    players: string[];
+    playerIds: string[];
     createdAt: Date;
     gameType?: string;
     gameId?: string;
