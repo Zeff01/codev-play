@@ -98,7 +98,7 @@ export const login = async (
 
     return ApiResponse.success(
       res,
-      { user: userWithoutPassword /*, token: token */ },
+      { user: userWithoutPassword, token },
       "Login successful",
     );
     // Return token in local development for easier testing

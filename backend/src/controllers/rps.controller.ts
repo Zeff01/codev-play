@@ -15,15 +15,12 @@ export class RPSController extends GameController<RockPaperScissorsService> {
     res: Response,
   ) {
     try {
-      const { choice, user } = req.body;
+      const { choice } = req.body;
       const gameId = req.params.gameId;
-      if (!user || !user.id) {
-        return res
-          .status(400)
-          .json({ error: "User ID is required in the request body." });
+      const userId = req.user?.id ? Number(req.user.id) : null;
+      if (!userId) {
+        return res.status(400).json({ error: "Unauthorized" });
       }
-
-      const userId = Number(user.id);
 
       const game = await this.service.playMove(gameId, userId, choice);
 

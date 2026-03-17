@@ -1,0 +1,23 @@
+info:
+  name: move
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/games/snake/move/{{gameId}}"
+  body:
+    type: json
+    data: |-
+      {
+        "newDirection" : "LEFT"
+      }
+  auth:
+    type: bearer
+    token: "{{token_player1}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
