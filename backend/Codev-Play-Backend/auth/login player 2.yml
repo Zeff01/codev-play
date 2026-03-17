@@ -13,9 +13,6 @@ http:
              "username": "player2",
              "password": "Password123"
             }
-  auth:
-    type: bearer
-    token: "{{token_player2}}"
 
 runtime:
   scripts:
