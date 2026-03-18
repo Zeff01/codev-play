@@ -98,7 +98,7 @@ export const login = async (
 
         return ApiResponse.success(
             res,
-            { user: userWithoutPassword },
+            { user: userWithoutPassword, token },
             "Login successful",
         );
     } catch (error) {
@@ -114,23 +114,7 @@ export const logout = (req: Request, res: Response) => {
         secure: isProd,
         sameSite: "strict",
         path: "/",
-      });
-    } catch (error) {
-      console.error("Failed to set auth cookie:", error);
-    }
-
-    const { password: _, ...userWithoutPassword } = user;
-
-    return ApiResponse.success(
-      res,
-      { user: userWithoutPassword, token },
-      "Login successful",
-    );
-    // Return token in local development for easier testing
-  } catch (error) {
-    next(new AppError("Login failed", 500));
-  }
-};
+    });
 
     return res.status(200).json({
         message: "Logged out successfully",
