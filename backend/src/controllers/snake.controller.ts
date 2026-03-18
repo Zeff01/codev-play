@@ -2,14 +2,22 @@ import { Request, Response, NextFunction } from "express";
 import { initializeGameState } from "@/services/snake/initial-game-state";
 import { generateFood } from "@/services/snake/food";
 import { pool } from "@/config/db";
-import { wallCollision, selfCollision, invalidDirectionChange } from "@/services/snake/movement";
+import {
+  wallCollision,
+  selfCollision,
+  invalidDirectionChange,
+} from "@/services/snake/movement";
 import { SnakeState } from "@/types/snake.type";
 import { GameStatus } from "@/types/game.type";
 import { eatFood } from "@/services/snake/food";
 import { moveEntity } from "@/utils/game-utils/movement";
 import logger from "@/utils/logger";
 
-export async function startGame(req: Request, res: Response, next: NextFunction) {
+export async function startGame(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const gameState = initializeGameState();
     gameState.food = generateFood(gameState);
@@ -37,9 +45,14 @@ export async function startGame(req: Request, res: Response, next: NextFunction)
 export async function move(req: Request, res: Response, next: NextFunction) {
   try {
     let { gameId, newDirection } = req.body;
-    const result = await pool.query(`SELECT game_state FROM snake WHERE score_id = $1`, [gameId]);
+    const result = await pool.query(
+      `SELECT game_state FROM snake WHERE score_id = $1`,
+      [gameId],
+    );
     if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, message: "Game not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Game not found" });
     }
     let gameState: SnakeState = result.rows[0].game_state;
 
@@ -59,11 +72,10 @@ export async function move(req: Request, res: Response, next: NextFunction) {
         gameState.snakeBody = foodEaten.snakeBody;
       }
     }
-    await pool.query(`UPDATE snake SET game_state = $1, score = $2 WHERE score_id = $3`, [
-      gameState,
-      gameState.score,
-      gameId,
-    ]);
+    await pool.query(
+      `UPDATE snake SET game_state = $1, score = $2 WHERE score_id = $3`,
+      [gameState, gameState.score, gameId],
+    );
 
     res.json({ success: true, state: gameState });
   } catch (error) {
@@ -76,10 +88,15 @@ export async function endGame(req: Request, res: Response, next: NextFunction) {
   try {
     const { gameId } = req.body;
 
-    const result = await pool.query(`SELECT score, game_state FROM snake WHERE score_id = $1`, [gameId]);
+    const result = await pool.query(
+      `SELECT score, game_state FROM snake WHERE score_id = $1`,
+      [gameId],
+    );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, message: "Game not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Game not found" });
     }
 
     const gameState: SnakeState = result.rows[0].game_state;

@@ -3,11 +3,12 @@ import jwt from "jsonwebtoken";
 import { ApiResponse } from "@/utils/api-response";
 
 export const auth = (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const token = req.cookies.token;
-        if (!process.env.JWT_SECRET) {
-            return ApiResponse.error(res, "JWT secret missing", 500);
-        }
+  try {
+    const token =
+      req.cookies.token || req.headers.authorization?.replace("Bearer ", "");
+    if (!process.env.JWT_SECRET) {
+      return ApiResponse.error(res, "JWT secret missing", 500);
+    }
 
         if (!token) {
             return ApiResponse.error(res, "No token provided", 401);

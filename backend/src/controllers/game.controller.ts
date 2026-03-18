@@ -6,7 +6,7 @@ export class GameController<T extends GameService<any>> {
 
   async createGameController(req: Request, res: Response) {
     try {
-      const Id = Number(req.body.user?.id);
+      const Id = Number(req.user?.id);
       if (!Id || Number.isNaN(Id)) {
         return res.status(401).json({ error: "Invalid user ID" });
       }
@@ -26,8 +26,12 @@ export class GameController<T extends GameService<any>> {
 
   async joinGameController(req: Request, res: Response) {
     try {
-      const userId = req.body.user!.id;
+      const userId = req.user?.id;
       const gameId = String(req.params!.gameId);
+
+      if (!userId) {
+        return res.status(401).json({ error: "Invalid user ID" });
+      }
 
       const game = await this.service.joinGame(gameId, userId);
       console.log(game);

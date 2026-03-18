@@ -13,19 +13,16 @@ http:
              "username": "player1",
              "password": "Password123"
             }
-  auth:
-    type: bearer
-    token: "{{token_player1}}"
 
 runtime:
   scripts:
     - type: after-response
       code: |-
-        if (res.getStatus() === 201) {
+        if (res.getStatus() === 200) {
                   const body = res.getBody();
                  if (body.data && body.data.token) {
                      bru.setEnvVar("token_player1", body.data.token);
-                     console.log("✅ Token saved to environment");
+                     console.log("Token saved to environment");
                  }
              }
 

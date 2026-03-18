@@ -1,19 +1,11 @@
 info:
-  name: create game
+  name: start
   type: http
   seq: 1
 
 http:
   method: POST
-  url: "{{baseUrl}}/games/rps/create"
-  body:
-    type: json
-    data: |-
-      {
-        "gameData" : {
-          "best_of_N" : 3
-        }
-      }
+  url: "{{baseUrl}}/games/snake/start"
   auth:
     type: bearer
     token: "{{token_player1}}"
