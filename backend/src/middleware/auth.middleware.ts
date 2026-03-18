@@ -4,7 +4,8 @@ import { ApiResponse } from "@/utils/api-response";
 
 export const auth = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = req.cookies.token;
+    const token =
+      req.cookies.token || req.headers.authorization?.replace("Bearer ", "");
     if (!process.env.JWT_SECRET) {
       return ApiResponse.error(res, "JWT secret missing", 500);
     }
