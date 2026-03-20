@@ -33,6 +33,7 @@ export const WINS_NEEDED = Math.ceil(BEST_OF / 2);
 export type RoomData = {
     id: string;
     name: string;
+    hostId: string;
     playerCount: number;
     playerIds: string[];
     createdAt: Date;

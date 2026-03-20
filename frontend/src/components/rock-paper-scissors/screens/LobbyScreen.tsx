@@ -27,6 +27,17 @@ export default function LobbyScreen() {
         if (socket && isConnected) {
             setSocket(socket);
             getRooms();
+
+            // Re-request rooms on reconnection
+            const handleReconnect = () => {
+                getRooms();
+            };
+
+            socket.on("connect", handleReconnect);
+
+            return () => {
+                socket.off("connect", handleReconnect);
+            };
         }
     }, [socket, isConnected, setSocket, getRooms]);
 
@@ -74,7 +85,7 @@ export default function LobbyScreen() {
                     </div>
                 </CardHeader>
 
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 mt-6">
                     <section>
                         <h2 className="text-lg font-semibold mb-4">
                             Available Rooms

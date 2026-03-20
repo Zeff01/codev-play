@@ -5,6 +5,7 @@ import type { RpsStore } from "./store.types";
 
 export type SocketSlice = {
     socket: Socket | null;
+    socketId: string | null;
     setSocket: (socket: Socket) => void;
 };
 
@@ -13,16 +14,17 @@ export const createSocketSlice: StateCreator<RpsStore, [], [], SocketSlice> = (
     get,
 ) => ({
     socket: null,
+    socketId: null,
 
     setSocket: (socket) => {
         if (!socket) {
-            set({ socket: null });
+            set({ socket: null, socketId: null });
             return;
         }
 
         socket.removeAllListeners();
 
-        set({ socket });
+        set({ socket, socketId: socket.id });
 
         socket.on("room:created", (data: RoomEventData) => {
             if (!data.success) return;
@@ -53,16 +55,32 @@ export const createSocketSlice: StateCreator<RpsStore, [], [], SocketSlice> = (
             get().opponentJoined();
         });
 
-        socket.on("rooms:list", (rooms: RoomData[]) => {
-            get().updateRooms(
-                rooms.map((r) => ({
+        socket.on(
+            "rooms:list",
+            (data: { gameType?: string; rooms: RoomData[] }) => {
+                const currentSocketId = get().socketId;
+                const formattedRooms = (data.rooms || []).map((r) => ({
                     id: r.id,
                     name: r.name,
                     players: r.playerCount,
                     gameType: r.gameType,
-                })),
-            );
-        });
+                    hostId: r.hostId,
+                }));
+
+                get().updateRooms(formattedRooms);
+
+                // Check if current user is host of their current room
+                const { roomId } = get();
+                if (roomId && currentSocketId) {
+                    const currentRoom = formattedRooms.find(
+                        (r) => r.id === roomId,
+                    );
+                    if (currentRoom && currentRoom.hostId === currentSocketId) {
+                        set({ isHost: true });
+                    }
+                }
+            },
+        );
 
         socket.on("match:started", () => {
             set({ phase: "choosing" });

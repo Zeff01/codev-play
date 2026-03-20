@@ -6,6 +6,7 @@ type LobbyRoom = {
     name: string;
     players: number;
     gameType?: string;
+    hostId?: string;
 };
 
 export type RoomSlice = {
@@ -78,7 +79,7 @@ export const createRoomSlice: StateCreator<RpsStore, [], [], RoomSlice> = (
     getRooms: () => {
         const { socket } = get();
         if (!socket) return console.warn("Socket not connected");
-        socket.emit("rooms:get");
+        socket.emit("rooms:get", { gameType: "rps" });
     },
 
     updateRooms: (rooms) => set({ rooms }),
