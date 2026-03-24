@@ -7,6 +7,7 @@ import {
   registerGameEvents,
   registerChatEvents,
   registerDisconnectEvents,
+  registerChessEvents,
 } from "./handlers";
 
 export const userSocketMap = new Map<string, string>();
