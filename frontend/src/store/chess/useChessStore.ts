@@ -1,65 +1,17 @@
 import { create } from "zustand";
 import { Chess } from "chess.js";
+import type {
+  ChessPhase,
+  ChessState,
+  Color,
+  GameStatus,
+  MoveEntry,
+  Room,
+  ValidationResult,
+} from "./chess.types";
 
-// Types
-
-export type ChessPhase = "idle" | "lobby" | "room" | "game";
-export type Color = "w" | "b";
-export type GameStatus =
-  | "playing"
-  | "check"
-  | "checkmate"
-  | "stalemate"
-  | "draw"
-  | "resigned";
-
-export interface MoveEntry {
-  san: string;
-  color: Color;
-  moveNumber: number;
-}
-
-export interface ValidationResult {
-  valid: boolean;
-  reason?: string;
-}
-
-export interface Room {
-  id: string;
-  name: string;
-  players: number;
-  maxPlayers: 2;
-  timeControl: number;
-}
-
-interface ChessState {
-  phase: ChessPhase;
-  rooms: Room[];
-  currentRoom: Room | null;
-  position: string;
-  activeColor: Color;
-  status: GameStatus;
-  moveHistory: MoveEntry[];
-  lastValidation: ValidationResult | null;
-  playerColor: Color | null;
-  clocks: { w: number; b: number };
-  setPhase: (phase: ChessPhase) => void;
-  setRooms: (rooms: Room[]) => void;
-  joinRoom: (room: Room) => void;
-  leaveRoom: () => void;
-  startGame: (playerColor: Color, timeControl: number) => void;
-  makeMove: (from: string, to: string, promotion?: string) => void;
-  setValidation: (result: ValidationResult) => void;
-  applyServerMove: (
-    fen: string,
-    san: string,
-    color: Color,
-    status: GameStatus,
-  ) => void;
-  tickClock: (color: Color) => void;
-  endGame: (status: GameStatus) => void;
-  reset: () => void;
-}
+// Re-export types for components that import from this file
+export type { ChessPhase, Color, GameStatus, MoveEntry, ValidationResult, Room };
 
 // Constants
 
@@ -67,15 +19,25 @@ const INITIAL_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 const initialState = {
   phase: "idle" as ChessPhase,
-  rooms: [],
-  currentRoom: null,
+  rooms: [] as Room[],
+  currentRoom: null as Room | null,
   position: INITIAL_FEN,
   activeColor: "w" as Color,
   status: "playing" as GameStatus,
-  moveHistory: [],
-  lastValidation: null,
-  playerColor: null,
+  moveHistory: [] as MoveEntry[],
+  lastValidation: null as ValidationResult | null,
+  playerColor: null as Color | null,
   clocks: { w: 600, b: 600 },
+
+  // Multiplayer state
+  roomId: null as string | null,
+  playerId: null as string | null,
+  opponentId: null as string | null,
+  isOnline: false,
+  isConnected: false,
+  opponentConnected: true,
+  drawOfferedBy: null as string | null,
+  rematchRequestedBy: null as string | null,
 };
 
 // Chess engine (outside store)
@@ -85,12 +47,6 @@ const chessEngine = new Chess();
 // Helpers
 
 function deriveStatus(engine: Chess): GameStatus {
-  console.log("deriveStatus:", {
-    isCheckmate: engine.isCheckmate(),
-    isStalemate: engine.isStalemate(),
-    isDraw: engine.isDraw(),
-    isCheck: engine.isCheck(),
-  });
   if (engine.isCheckmate()) return "checkmate";
   if (engine.isStalemate()) return "stalemate";
   if (engine.isDraw()) return "draw";
@@ -99,10 +55,11 @@ function deriveStatus(engine: Chess): GameStatus {
 }
 
 // Store
-// TODO: [F503 - Handle real-time moves] Add socket: Socket | null and setSocket() here
-// setSocket() registers all chess:* socket events (see F503 PR10)
+
 export const useChessStore = create<ChessState>((set, get) => ({
   ...initialState,
+
+  // ─── Core Actions (unchanged from local play) ───
 
   setPhase: (phase) => set({ phase }),
 
@@ -110,7 +67,14 @@ export const useChessStore = create<ChessState>((set, get) => ({
 
   joinRoom: (room) => set({ currentRoom: room, phase: "room" }),
 
-  leaveRoom: () => set({ currentRoom: null, phase: "lobby" }),
+  leaveRoom: () =>
+    set({
+      currentRoom: null,
+      phase: "lobby",
+      roomId: null,
+      opponentId: null,
+      isOnline: false,
+    }),
 
   startGame: (playerColor, timeControl) => {
     chessEngine.reset();
@@ -123,6 +87,8 @@ export const useChessStore = create<ChessState>((set, get) => ({
       moveHistory: [],
       lastValidation: null,
       clocks: { w: timeControl, b: timeControl },
+      drawOfferedBy: null,
+      rematchRequestedBy: null,
     });
   },
 
@@ -130,6 +96,14 @@ export const useChessStore = create<ChessState>((set, get) => ({
     const state = get();
     if (state.status !== "playing" && state.status !== "check") return;
 
+    // In online mode, don't apply locally — just return and let
+    // the socket hook emit the move. The server will respond with
+    // chess:moveMade which calls applyServerMove().
+    if (state.isOnline) {
+      return;
+    }
+
+    // Local mode: apply immediately
     try {
       const move = chessEngine.move({ from, to, promotion });
 
@@ -156,13 +130,14 @@ export const useChessStore = create<ChessState>((set, get) => ({
   },
 
   setValidation: (result) => set({ lastValidation: result }),
-  // TODO: [F503 - Handle real-time moves] Called when opponent's move arrives via socket.on("chess:moveMade"
+
   applyServerMove: (fen, san, color, status) => {
     chessEngine.load(fen);
     set((state) => ({
       position: fen,
       status,
       activeColor: chessEngine.turn() as Color,
+      lastValidation: { valid: true },
       moveHistory: [
         ...state.moveHistory,
         {
@@ -188,4 +163,25 @@ export const useChessStore = create<ChessState>((set, get) => ({
     chessEngine.reset();
     set({ ...initialState });
   },
+
+  // ─── Multiplayer Actions ───
+
+  setRoomId: (id) => set({ roomId: id }),
+
+  setPlayerId: (id) => set({ playerId: id }),
+
+  setOpponentId: (id) => set({ opponentId: id }),
+
+  setOnline: (online) => set({ isOnline: online }),
+
+  setConnected: (connected) => set({ isConnected: connected }),
+
+  setOpponentConnected: (connected) => set({ opponentConnected: connected }),
+
+  setDrawOffer: (offeredBy) => set({ drawOfferedBy: offeredBy }),
+
+  setRematchRequest: (requestedBy) =>
+    set({ rematchRequestedBy: requestedBy }),
+
+  syncClocks: (clocks) => set({ clocks }),
 }));

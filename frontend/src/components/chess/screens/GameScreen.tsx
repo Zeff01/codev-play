@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useChessStore } from "@/store/chess/useChessStore";
+import { useChessSocket } from "@/hooks/chess/useChessSocket";
 import ChessBoard from "@/components/chess/ChessBoard";
 import MoveHistory from "@/components/chess/MoveHistory";
 import GameClock from "@/components/chess/GameClock";
@@ -26,11 +27,26 @@ export default function GameScreen() {
     lastValidation,
     playerColor,
     clocks,
+    roomId,
+    isOnline,
+    opponentConnected,
+    drawOfferedBy,
+    rematchRequestedBy,
+    playerId,
     makeMove,
     tickClock,
     endGame,
     reset,
   } = useChessStore();
+
+  const {
+    sendMove,
+    offerDraw,
+    respondDraw,
+    resign,
+    requestRematch,
+    respondRematch,
+  } = useChessSocket();
 
   // Add this line right here!
   const material = getMaterialAdvantage(position);
@@ -44,18 +60,115 @@ export default function GameScreen() {
     status === "stalemate" ||
     status === "draw" ||
     status === "resigned";
-  const isBoardDisabled = isGameOver;
 
-  // TODO: uncomment when player constraints are needed
-  // const isBoardDisabled = playerColor !== null
-  //     ? activeColor !== orientation || status !== "playing"
-  //     : status !== "playing";
+  // In online mode, disable board when:
+  //   1. It's not the player's turn
+  //   2. Game is over
+  // In local mode, only disable when game is over
+  const isBoardDisabled = isOnline
+    ? isGameOver || activeColor !== playerColor
+    : isGameOver;
+
+  // ── Move handler: local OR online ──
+  const handleMove = useCallback(
+    (from: string, to: string, promotion?: string) => {
+      if (isOnline && roomId) {
+        // Online: emit to server, don't apply locally
+        sendMove(roomId, from, to, promotion);
+      } else {
+        // Local: apply immediately via store
+        makeMove(from, to, promotion);
+      }
+    },
+    [isOnline, roomId, sendMove, makeMove],
+  );
+
+  // ── Draw handling ──
+  const handleOfferDraw = () => {
+    if (isOnline && roomId) {
+      offerDraw(roomId);
+      setShowDrawModal(true);
+    } else {
+      setShowDrawModal(true);
+    }
+  };
+
+  const handleAcceptDraw = () => {
+    if (isOnline && roomId) {
+      respondDraw(roomId, true);
+    } else {
+      endGame("draw");
+    }
+    setShowDrawModal(false);
+  };
+
+  const handleDeclineDraw = () => {
+    if (isOnline && roomId) {
+      respondDraw(roomId, false);
+    }
+    setShowDrawModal(false);
+  };
+
+  // ── Resign handling ──
+  const handleResign = () => {
+    if (isOnline && roomId) {
+      resign(roomId);
+    } else {
+      endGame("resigned");
+    }
+  };
+
+  // ── Rematch / Play Again handling ──
+  const handlePlayAgain = () => {
+    if (isOnline && roomId) {
+      requestRematch(roomId);
+    } else {
+      reset();
+    }
+  };
+
+  // ── Determine if draw modal should show as recipient ──
+  const isDrawRecipient = isOnline && drawOfferedBy !== null && drawOfferedBy !== playerId;
+  const showDrawFromOpponent = isDrawRecipient && !showDrawModal;
 
   return (
-    // Main Container: Center everything, use a column on mobile, row on large screens
+    // Main Container
     <div className="flex flex-col xl:flex-row items-center xl:items-start justify-center gap-6 p-4 lg:p-8 min-h-[calc(100vh-4rem)] w-full max-w-6xl mx-auto">
       {/* LEFT COLUMN: Players & Board */}
       <div className="flex flex-col gap-3 w-full max-w-fit">
+        {/* Opponent disconnected banner */}
+        {isOnline && !opponentConnected && !isGameOver && (
+          <div className="w-full bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-center">
+            <p className="font-roboto text-sm text-destructive font-medium">
+              ⚠ Opponent disconnected. They have 30 seconds to reconnect.
+            </p>
+          </div>
+        )}
+
+        {/* Rematch request banner */}
+        {rematchRequestedBy && rematchRequestedBy !== playerId && (
+          <div className="w-full bg-primary/10 border border-primary/30 rounded-lg p-3 flex items-center justify-between">
+            <p className="font-roboto text-sm text-primary font-medium">
+              Opponent wants a rematch!
+            </p>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={() => roomId && respondRematch(roomId, true)}
+              >
+                Accept
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => roomId && respondRematch(roomId, false)}
+              >
+                Decline
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* OPPONENT TOP BAR */}
         <div className="flex items-center justify-between w-full bg-card border border-border rounded-lg p-3 shadow-sm">
           <div className="flex items-center gap-3">
@@ -70,6 +183,13 @@ export default function GameScreen() {
                 <p className="font-outfit text-sm font-bold tracking-wide text-foreground">
                   Opponent
                 </p>
+                {isOnline && (
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      opponentConnected ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  />
+                )}
                 <Badge
                   variant="secondary"
                   className="text-[10px] px-1.5 py-0 h-4 font-mono font-semibold"
@@ -77,10 +197,8 @@ export default function GameScreen() {
                   1200 ELO
                 </Badge>
               </div>
-              {/* Captured pieces placeholder */}
 
               <div className="h-4 mt-0.5 flex items-center text-muted-foreground text-xs">
-                {/* We will inject captured pieces here next */}
                 <CapturedPieces
                   capturedPieces={material[opponentColor].captured}
                   advantage={material[opponentColor].advantage}
@@ -93,7 +211,6 @@ export default function GameScreen() {
           <div className="scale-90 origin-right">
             <GameClock
               timeLeft={clocks[opponentColor]}
-              // Added the moveHistory check here!
               isActive={
                 activeColor === opponentColor &&
                 !isGameOver &&
@@ -111,7 +228,7 @@ export default function GameScreen() {
             position={position}
             activeColor={activeColor}
             status={status}
-            onMove={makeMove}
+            onMove={handleMove}
             validationResult={lastValidation}
             orientation={orientation}
             disabled={isBoardDisabled}
@@ -139,9 +256,7 @@ export default function GameScreen() {
                   1200 ELO
                 </Badge>
               </div>
-              {/* Captured pieces placeholder */}
               <div className="h-4 mt-0.5 flex items-center text-muted-foreground text-xs">
-                {/* We will inject captured pieces here next */}
                 <CapturedPieces
                   capturedPieces={material[orientation].captured}
                   advantage={material[orientation].advantage}
@@ -154,7 +269,6 @@ export default function GameScreen() {
           <div className="scale-90 origin-right">
             <GameClock
               timeLeft={clocks[orientation]}
-              // Added the moveHistory check here!
               isActive={
                 activeColor === orientation &&
                 !isGameOver &&
@@ -169,11 +283,9 @@ export default function GameScreen() {
 
       {/* RIGHT COLUMN: Sidebar (Move History & Actions) */}
       <div className="flex flex-col gap-4 w-full max-w-sm xl:w-80 h-full">
-        {/* 👇 ADD GAME ALERTS HERE 👇 */}
         <div className="w-full">
           <GameAlerts status={status} activeColor={activeColor} />
         </div>
-        {/* Fixed height container for move history so it doesn't stretch weirdly */}
         <div className="h-[250px] xl:h-[450px] w-full flex">
           <MoveHistory moves={moveHistory} />
         </div>
@@ -185,14 +297,14 @@ export default function GameScreen() {
               <Button
                 variant="outline"
                 className="flex-1 font-outfit font-semibold tracking-wide"
-                onClick={() => setShowDrawModal(true)}
+                onClick={handleOfferDraw}
               >
                 Offer Draw
               </Button>
               <Button
                 variant="destructive"
                 className="flex-1 font-outfit font-semibold tracking-wide"
-                onClick={() => endGame("resigned")}
+                onClick={handleResign}
               >
                 Resign
               </Button>
@@ -201,21 +313,29 @@ export default function GameScreen() {
             <Button
               variant="default"
               className="w-full font-outfit font-bold tracking-widest uppercase"
-              onClick={reset}
+              onClick={handlePlayAgain}
             >
-              Play Again / Lobby
+              {isOnline ? "Request Rematch" : "Play Again / Lobby"}
             </Button>
           )}
         </div>
       </div>
 
+      {/* Draw offer modal — sent by this player */}
       {showDrawModal && (
         <DrawOfferModal
-          onAccept={() => {
-            endGame("draw");
-            setShowDrawModal(false);
-          }}
-          onDecline={() => setShowDrawModal(false)}
+          isRecipient={false}
+          onAccept={handleAcceptDraw}
+          onDecline={handleDeclineDraw}
+        />
+      )}
+
+      {/* Draw offer modal — received from opponent */}
+      {showDrawFromOpponent && (
+        <DrawOfferModal
+          isRecipient={true}
+          onAccept={handleAcceptDraw}
+          onDecline={handleDeclineDraw}
         />
       )}
     </div>
