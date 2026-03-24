@@ -3,7 +3,7 @@ import { Room, RoomInfo } from "@/types/room.type";
 export class RoomManager {
   private rooms: Map<string, Room> = new Map();
 
-  createRoom(hostId: string, roomName?: string, gameType?: "tictactoe" | "snake" | "rps"): Room {
+  createRoom(hostId: string, roomName?: string, gameType?: "tictactoe" | "snake" | "rps" | "chess"): Room {
     const roomId = this.generateRoomId();
     const room: Room = {
       id: roomId,

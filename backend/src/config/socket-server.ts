@@ -7,6 +7,7 @@ import {
   registerGameEvents,
   registerChatEvents,
   registerDisconnectEvents,
+  registerChessEvents,
 } from "./handlers";
 
 export const userSocketMap = new Map<string, string>();
@@ -42,6 +43,7 @@ export function initializeSocket(server: HTTPServer) {
     registerGameEvents(io, socket, roomManager, userSocketMap);
     registerChatEvents(io, socket);
     registerDisconnectEvents(io, socket, roomManager);
+    registerChessEvents(io, socket, roomManager, userSocketMap);
   });
 
   io.on("connect_error", (err) => {
