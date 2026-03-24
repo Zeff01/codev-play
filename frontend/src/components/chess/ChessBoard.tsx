@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { Chess } from "chess.js";
-import type { ValidationResult, GameStatus } from "@/store/chess/useChessStore";
+import type { ValidationResult, GameStatus } from "@/types/chess.type";
 import { cn } from "@/lib/utils";
 
 import TurnIndicator from "./board/TurnIndicator";

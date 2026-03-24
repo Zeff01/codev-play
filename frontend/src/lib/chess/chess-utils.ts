@@ -1,4 +1,6 @@
 // lib/chess-utils.ts
+import { Chess } from "chess.js";
+import type { GameStatus } from "@/types/chess.type";
 
 export type PieceSymbol = "p" | "n" | "b" | "r" | "q";
 
@@ -62,4 +64,15 @@ export function getMaterialAdvantage(fen: string) {
     w: { captured: wCaptured, advantage: wScore - bScore },
     b: { captured: bCaptured, advantage: bScore - wScore },
   };
+}
+
+export const INITIAL_FEN =
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+export function deriveStatus(engine: Chess): GameStatus {
+  if (engine.isCheckmate()) return "checkmate";
+  if (engine.isStalemate()) return "stalemate";
+  if (engine.isDraw()) return "draw";
+  if (engine.isCheck()) return "check";
+  return "playing";
 }
