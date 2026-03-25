@@ -1,0 +1,5 @@
+ALTER TABLE tictactoe 
+ADD CONSTRAINT fk_player_x 
+FOREIGN KEY (player_x) REFERENCES users(id) ON DELETE SET NULL,
+ADD CONSTRAINT fk_player_o 
+FOREIGN KEY (player_o) REFERENCES users(id) ON DELETE SET NULL;
