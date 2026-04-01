@@ -27,7 +27,14 @@ export function registerRoomEvents(
                 });
 
                 logger.info(`Created room ${room.id} for user ${socket.id}`);
-                io.emit("rooms:list", roomManager.listRooms());
+                // Broadcast only to clients interested in this game type
+                const filteredRooms = roomManager
+                    .listRooms()
+                    .filter((room) => room.gameType === data?.gameType);
+                io.emit("rooms:list", {
+                    gameType: data?.gameType,
+                    rooms: filteredRooms,
+                });
             } catch (err) {
                 logger.error("Error creating room", { error: err });
                 socket.emit("room:error", { message: "Failed to create room" });
@@ -47,6 +54,7 @@ export function registerRoomEvents(
 
             socket.join(data.roomId);
 
+            const room = roomManager.getRoom(data.roomId);
             socket.emit("room:joined", {
                 success: true,
                 room: roomManager.getRoomInfo(data.roomId),
@@ -58,8 +66,14 @@ export function registerRoomEvents(
                 room: roomManager.getRoomInfo(data.roomId),
             });
 
-            // Broadcast updated room list
-            io.emit("rooms:list", roomManager.listRooms());
+            // Broadcast updated room list to only this game type
+            const filteredRooms = roomManager
+                .listRooms()
+                .filter((r) => r.gameType === room?.gameType);
+            io.emit("rooms:list", {
+                gameType: room?.gameType,
+                rooms: filteredRooms,
+            });
         } catch (err) {
             logger.error("Error joining room", { error: err });
             socket.emit("room:error", { message: "Failed to join room" });
@@ -68,6 +82,7 @@ export function registerRoomEvents(
 
     socket.on("room:leave", (data: { roomId: string }) => {
         try {
+            const room = roomManager.getRoom(data.roomId);
             roomManager.leaveRoom(data.roomId, socket.id);
             socket.leave(data.roomId);
 
@@ -79,8 +94,14 @@ export function registerRoomEvents(
                 room: roomManager.getRoomInfo(data.roomId),
             });
 
-            // Broadcast updated room list
-            io.emit("rooms:list", roomManager.listRooms());
+            // Broadcast updated room list to only this game type
+            const filteredRooms = roomManager
+                .listRooms()
+                .filter((r) => r.gameType === room?.gameType);
+            io.emit("rooms:list", {
+                gameType: room?.gameType,
+                rooms: filteredRooms,
+            });
         } catch (err) {
             logger.error("Error leaving room", { error: err });
             socket.emit("room:error", { message: "Failed to leave room" });
@@ -104,9 +125,20 @@ export function registerRoomEvents(
         }
     });
 
-    socket.on("rooms:get", () => {
-        socket.emit("rooms:list", roomManager.listRooms());
-    });
+    socket.on(
+        "rooms:get",
+        (data?: { gameType?: "tictactoe" | "snake" | "rps" }) => {
+            const filteredRooms = roomManager
+                .listRooms()
+                .filter((room) =>
+                    data?.gameType ? room.gameType === data.gameType : true,
+                );
+            socket.emit("rooms:list", {
+                gameType: data?.gameType,
+                rooms: filteredRooms,
+            });
+        },
+    );
 
     socket.on("room:get", (data: { roomId: string }) => {
         const roomInfo = roomManager.getRoomInfo(data.roomId);

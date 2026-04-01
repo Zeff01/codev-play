@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useRpsStore } from "@/store/rps/useRpsStore";
 import {
     Card,
@@ -16,8 +17,22 @@ import { DoorOpen, Play } from "lucide-react";
 export default function RoomScreen() {
     const router = useRouter();
 
-    const { roomId, roomName, isHost, hasOpponent, startMatch, leaveRoom } =
-        useRpsStore();
+    const {
+        roomId,
+        roomName,
+        isHost,
+        hasOpponent,
+        phase,
+        startMatch,
+        leaveRoom,
+    } = useRpsStore();
+
+    // Auto-navigate when game starts for both host and non-host
+    useEffect(() => {
+        if (phase === "choosing" && roomId) {
+            router.push(`/rps/game/${roomId}`);
+        }
+    }, [phase, roomId, router]);
 
     return (
         <main className="min-h-screen flex items-center justify-center p-6 bg-background text-foreground">
