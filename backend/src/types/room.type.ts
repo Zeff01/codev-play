@@ -4,7 +4,7 @@ export interface Room {
     hostId: string;
     players: Set<string>;
     createdAt: Date;
-    gameType?: "tictactoe" | "snake" | "rps";
+    gameType?: "tictactoe" | "snake" | "rps" | "chess";
     gameState?: any;
     gameId?: string;
 }

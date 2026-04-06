@@ -11,7 +11,7 @@ export function registerRoomEvents(
         "room:create",
         (data: {
             roomName?: string;
-            gameType?: "tictactoe" | "snake" | "rps";
+            gameType?: "tictactoe" | "snake" | "rps" | "chess";
         }) => {
             try {
                 const room = roomManager.createRoom(
@@ -127,7 +127,7 @@ export function registerRoomEvents(
 
     socket.on(
         "rooms:get",
-        (data?: { gameType?: "tictactoe" | "snake" | "rps" }) => {
+        (data?: { gameType?: "tictactoe" | "snake" | "rps" | "chess" }) => {
             const filteredRooms = roomManager
                 .listRooms()
                 .filter((room) =>
