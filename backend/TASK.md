@@ -124,23 +124,23 @@ This document contains step-by-step tasks for implementing the backend API for C
 
 ### TASK-B401: Chess Game Logic
 
-- [ ] Install chess.js library
-- [ ] Create game state schema
-- [ ] Implement board initialization
-- [ ] Add move validation using chess.js
-- [ ] Implement check/checkmate detection
-- [ ] Add castling and en passant support
-- [ ] Create move history tracking
+- [x ] Install chess.js library
+- [x] Create game state schema
+- [x] Implement board initialization
+- [x] Add move validation using chess.js
+- [x] Implement check/checkmate detection
+- [x] Add castling and en passant support
+- [x] Create move history tracking
 
 ### TASK-B402: Chess API Endpoints
 
-- [ ] POST /api/games/chess/create - Create new game
-- [ ] POST /api/games/chess/:gameId/join - Join game
-- [ ] POST /api/games/chess/:gameId/move - Make a move
-- [ ] GET /api/games/chess/:gameId - Get game state
-- [ ] GET /api/games/chess/:gameId/moves - Get move history
-- [ ] POST /api/games/chess/:gameId/resign - Resign game
-- [ ] POST /api/games/chess/:gameId/draw - Offer draw
+- [x] POST /api/games/chess/create - Create new game
+- [x] POST /api/games/chess/:gameId/join - Join game
+- [x] POST /api/games/chess/:gameId/move - Make a move
+- [x] GET /api/games/chess/:gameId - Get game state
+- [x] GET /api/games/chess/:gameId/moves - Get move history
+- [x] POST /api/games/chess/:gameId/resign - Resign game
+- [x] POST /api/games/chess/:gameId/draw - Offer draw
 
 ### TASK-B403: Chess Real-time Features
 

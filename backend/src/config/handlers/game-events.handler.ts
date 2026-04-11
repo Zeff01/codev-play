@@ -3,12 +3,18 @@ import { RoomManager } from "@/utils/room-manager";
 import { TicTacToeService } from "@/services/tictactoe/tictactoe.service";
 import { ticTacToeModel } from "@/models/tictactoe.model";
 import logger from "@/utils/logger";
+import { ChessService } from "@/services/chess/chess.services";
+import { ChessModel } from "@/models/chess.model";
+import { ChessSocket } from "@/sockets/chess.socket";
+import { GameDisconnectHandler } from "@/services/chess/chess.disconnecthandler";
 
 const tttService = new TicTacToeService(new ticTacToeModel());
+const chessService = new ChessService(new ChessSocket(), new ChessModel());
 
 // Game service registry for different game types
 const gameServices = {
   tictactoe: tttService,
+  chess: chessService,
   // Add other game services here as they're implemented
   // snake: snakeService,
   // rps: rpsService,
@@ -97,6 +103,22 @@ export function registerGameEvents(
           );
           break;
 
+        case "chess":
+          // Chess move: { from, to, promotion }
+          if (!data.moveData?.from || !data.moveData?.to) {
+            socket.emit("game:error", { message: "Invalid move data for Chess" });
+            return;
+          }
+
+          game = await (gameService as any).playMove(
+            data.gameId,
+            parseInt(userId),
+            data.moveData.from,
+            data.moveData.to,
+            data.moveData.promotion
+          );
+          break;
+
         // Add other game types here
         // case 'snake':
         //   game = await (gameService as SnakeService).handleMove(data.gameId, parseInt(userId), data.moveData);
@@ -160,4 +182,55 @@ export function registerGameEvents(
       socket.emit("game:error", { message: "Failed to reset game" });
     }
   });
+  
+  socket.on("game:reconnect", async (data: { gameId: string; gameType?: string }) => {
+  try {
+    // Find the userId from socket map
+    let userId = null;
+    for (const [uid, sid] of userSocketMap.entries()) {
+      if (sid === socket.id) {
+        userId = uid;
+        break;
+      }
+    }
+
+    if (!userId) {
+      socket.emit("game:error", { message: "User not authenticated" });
+      return;
+    }
+    const rawUserId = parseInt(userId, 10);
+
+    // Cancel disconnect timer for chess
+    if (data.gameType === "chess") {
+      const gameDisconnect = new GameDisconnectHandler(
+        io,
+        chessService, 
+        new ChessModel(),
+        new ChessSocket()
+      );
+      gameDisconnect.handleReconnect(data.gameId, rawUserId);
+    }
+    // For other games, add similar clear logic
+
+    // Rejoin the game socket room
+    socket.join(`game:${data.gameId}`);
+
+    // Fetch latest game state
+    const gameService = gameServices[data.gameType as keyof typeof gameServices];
+    const game = await gameService.fetchGame(data.gameId);
+
+    // Send restored state to reconnecting player
+    socket.emit("game:restore", {
+      gameId: data.gameId,
+      gameType: data.gameType,
+      game,
+    });
+
+    logger.info(`User ${socket.id} reconnected to game ${data.gameId} (${data.gameType})`);
+  } catch (err) {
+    logger.error("Error reconnecting to game", { error: err });
+    socket.emit("game:error", { message: "Failed to reconnect" });
+  }
+});
+
 }

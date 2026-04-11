@@ -6,7 +6,7 @@ export class RoomManager {
     createRoom(
         hostId: string,
         roomName?: string,
-        gameType?: "tictactoe" | "snake" | "rps",
+        gameType?: "tictactoe" | "snake" | "rps" | "chess",
     ): Room {
         const roomId = this.generateRoomId();
         const room: Room = {
@@ -63,6 +63,7 @@ export class RoomManager {
         return Array.from(this.rooms.values()).map((room) => ({
             id: room.id,
             name: room.name,
+            hostId: room.hostId,
             playerCount: room.players.size,
             players: Array.from(room.players),
             createdAt: room.createdAt,
