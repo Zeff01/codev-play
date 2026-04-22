@@ -2,9 +2,31 @@ opencollection: 1.0.0
 
 info:
   name: Codev-Play-Backend
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+request:
+  scripts:
+    - type: before-request
+      code: |-
+        const jar = bru.cookies.jar();
+        jar.clear();
 bundled: false
 extensions:
   bruno:
     ignore:
       - node_modules
       - .git
+    presets:
+      request:
+        type: http
+        url: http://localhost:5000/api
