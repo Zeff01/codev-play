@@ -15,7 +15,6 @@ type SocketContextType = {
     socket: Socket | null;
     socketId: string | null;
     isConnected: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rooms: any[];
 };
 
@@ -28,56 +27,69 @@ const SocketContext = createContext<SocketContextType>({
 
 export function SocketProvider({ children }: { children: ReactNode }) {
     const socketRef = useRef<Socket | null>(null);
-    const [socket, setSocket] = useState<Socket | null>(null);
+
     const [isConnected, setIsConnected] = useState(false);
     const [socketId, setSocketId] = useState<string | null>(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [rooms, setRooms] = useState<any[]>([]);
 
     useEffect(() => {
-        socketRef.current = io(process.env.NEXT_PUBLIC_API_URL!, {
+        const userId =
+            localStorage.getItem("userId") ||
+            crypto.randomUUID();
+
+        localStorage.setItem("userId", userId);
+
+        const socket = io(process.env.NEXT_PUBLIC_API_URL!, {
             transports: ["websocket"],
         });
 
+        socketRef.current = socket;
+
         const handleConnect = () => {
-            setSocket(socketRef.current);
             setIsConnected(true);
-            setSocketId(socketRef.current?.id || null);
+            setSocketId(socket.id ?? null);
+
+            // register identity
+            socket.emit("user:register", { userId });
         };
 
         const handleDisconnect = () => {
             setIsConnected(false);
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const handleRoomsList = (data: { gameType?: string; rooms: any[] }) => {
+        const handleRoomsList = (data: { rooms: any[] }) => {
             setRooms(data.rooms || []);
         };
 
-        socketRef.current.on("connect", handleConnect);
-        socketRef.current.on("disconnect", handleDisconnect);
-        socketRef.current.on("rooms:list", handleRoomsList);
+        socket.on("connect", handleConnect);
+        socket.on("disconnect", handleDisconnect);
+        socket.on("rooms:list", handleRoomsList);
 
-        socketRef.current.on("room:created", (data) => {
-            console.log("Room created in frontend:", data);
+        socket.on("room:created", (data) => {
+            console.log("Room created:", data);
         });
 
-        socketRef.current.on("room:joined", (data: { roomId: string }) => {
-            console.log("Room joined in frontend:", data);
+        socket.on("room:joined", (data) => {
+            console.log("Room joined:", data);
         });
 
         return () => {
-            socketRef.current?.off("connect", handleConnect);
-            socketRef.current?.off("disconnect", handleDisconnect);
-            socketRef.current?.off("rooms:list", handleRoomsList);
-            socketRef.current?.disconnect();
-            socketRef.current = null;
+            socket.off("connect", handleConnect);
+            socket.off("disconnect", handleDisconnect);
+            socket.off("rooms:list", handleRoomsList);
+
+            socket.disconnect();
         };
     }, []);
 
     const contextValue = useMemo(
-        () => ({ socket, socketId, isConnected, rooms }),
-        [socket, socketId, isConnected, rooms],
+        () => ({
+            socket: socketRef.current,
+            socketId,
+            isConnected,
+            rooms,
+        }),
+        [socketId, isConnected, rooms],
     );
 
     return (

@@ -1,3 +1,4 @@
+
 import { Server, Socket } from "socket.io";
 import { RoomManager } from "@/utils/room-manager";
 import { ChessService } from "@/services/chess/chess.services";
@@ -35,12 +36,7 @@ function startClockSync(io: Server, gameId: string, getGame: () => Promise<any>)
     clockIntervals.set(gameId, interval);
 }
 
-function getUserId(socket: Socket, userSocketMap: Map<string, string>): number | null {
-    for (const [uid, sid] of userSocketMap.entries()) {
-        if (sid === socket.id) return parseInt(uid, 10);
-    }
-    return null;
-}
+
 
 export function registerChessEvents(
     io: Server,
@@ -49,7 +45,7 @@ export function registerChessEvents(
     userSocketMap: Map<string, string>,
 ) {
     socket.on("chess:startClock", (data: { gameId: string }) => {
-        const userId = getUserId(socket, userSocketMap);
+        const userId = socket.data.userId;
         if (!userId) { socket.emit("chess:error", { message: "Not authenticated" }); return; }
         startClockSync(io, data.gameId, () => chessService.fetchGame(data.gameId));
         logger.info(`Clock sync started for game ${data.gameId}`);
@@ -57,7 +53,7 @@ export function registerChessEvents(
 
     socket.on("chess:resign", async (data: { gameId: string }) => {
         try {
-            const userId = getUserId(socket, userSocketMap);
+            const userId = socket.data.userId;
             if (!userId) { socket.emit("chess:error", { message: "Not authenticated" }); return; }
             await chessService.resignGame(data.gameId, userId);
             if (clockIntervals.has(data.gameId)) {
@@ -72,7 +68,7 @@ export function registerChessEvents(
 
     socket.on("chess:offerDraw", async (data: { gameId: string }) => {
         try {
-            const userId = getUserId(socket, userSocketMap);
+            const userId = socket.data.userId;
             if (!userId) { socket.emit("chess:error", { message: "Not authenticated" }); return; }
             await chessService.offerDraw(data.gameId, userId);
         } catch (err: any) {
@@ -82,7 +78,7 @@ export function registerChessEvents(
 
     socket.on("chess:acceptDraw", async (data: { gameId: string }) => {
         try {
-            const userId = getUserId(socket, userSocketMap);
+            const userId = socket.data.userId;
             if (!userId) { socket.emit("chess:error", { message: "Not authenticated" }); return; }
             await chessService.acceptDraw(data.gameId, userId);
             if (clockIntervals.has(data.gameId)) {
@@ -96,7 +92,7 @@ export function registerChessEvents(
 
     socket.on("chess:declineDraw", async (data: { gameId: string }) => {
         try {
-            const userId = getUserId(socket, userSocketMap);
+            const userId = socket.data.userId;
             if (!userId) { socket.emit("chess:error", { message: "Not authenticated" }); return; }
             await chessService.rejectDraw(data.gameId, userId);
         } catch (err: any) {
@@ -105,7 +101,7 @@ export function registerChessEvents(
     });
 
     socket.on("disconnect", () => {
-        const userId = getUserId(socket, userSocketMap);
+        const userId = socket.data.userId;
         if (!userId) return;
         const playerRoom = roomManager.getPlayerRoom(socket.id);
         if (!playerRoom || playerRoom.gameType !== "chess") return;

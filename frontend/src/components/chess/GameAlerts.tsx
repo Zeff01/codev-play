@@ -1,13 +1,14 @@
 "use client";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import type { GameStatus, Color } from "@/store/chess/useChessStore";
+import type { GameStatus, Color } from "@/types/chess.type";
 
 // Types
 
 interface Props {
   status: GameStatus;
-  activeColor: Color;
+  activeColor: Color;      // player viewing the board
+  winner?: Color | null;   // NEW: actual winner from backend
 }
 
 interface AlertConfig {
@@ -16,61 +17,80 @@ interface AlertConfig {
   description: string;
 }
 
-// Alert Map
+// Core logic
 
-function resolveAlert(status: GameStatus, activeColor: Color): AlertConfig {
-  const side = activeColor === "w" ? "White" : "Black";
+function resolveAlert(
+  status: GameStatus,
+  activeColor: Color,
+  winner?: Color | null
+): AlertConfig {
+  const isPlayerWinner = winner ? winner === activeColor : null;
 
   switch (status) {
     case "check":
       return {
         variant: "destructive",
         title: "⚠️ Check",
-        description: `${side} is in check!`,
+        description: "Your king is in check!",
       };
+
     case "checkmate":
       return {
         variant: "destructive",
         title: "Checkmate",
-        description: `${side} has been checkmated. Game over.`,
+        description:
+          winner === null
+            ? "Game over by checkmate."
+            : isPlayerWinner
+              ? "You won by checkmate!"
+              : "You have been checkmated.",
       };
+
     case "stalemate":
       return {
         variant: "default",
         title: "Stalemate",
-        description: "No legal moves — the game is a draw.",
+        description: "No legal moves available — draw.",
       };
+
     case "draw":
       return {
         variant: "default",
         title: "Draw",
-        description: "The game has ended in a draw.",
+        description: "The game ended in a draw.",
       };
+
     case "resigned":
       return {
         variant: "default",
-        title: "Resigned",
-        description: `${side} has resigned. Game over.`,
+        title: "Resignation",
+        description: isPlayerWinner
+          ? "Opponent resigned. You win!"
+          : "You resigned. Game over.",
       };
+
     case "playing":
     default:
       return {
         variant: "default",
         title: "Game in Progress",
-        description: `${side} to move.`,
+        description: "Your turn to play.",
       };
   }
 }
 
 // Component
 
-export default function GameAlerts({ status, activeColor }: Props) {
-  const config = resolveAlert(status, activeColor);
+export default function GameAlerts({
+  status,
+  activeColor,
+  winner = null,
+}: Props) {
+  const config = resolveAlert(status, activeColor, winner);
 
   return (
     <Alert
       variant={config.variant}
-      // Removed the slide-in animation since it's always visible now
       className="w-full bg-card shadow-sm transition-colors duration-300"
     >
       <AlertTitle className="font-outfit text-sm font-bold tracking-wide">

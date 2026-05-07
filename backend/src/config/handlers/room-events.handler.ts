@@ -76,11 +76,24 @@ export function registerRoomEvents(io: Server, socket: Socket, roomManager: Room
             const [hostSocketId, guestSocketId] = Array.from(room.players);
 
             // Resolve userIds from socket IDs
-            let hostUserId: number | null = null;
-            let guestUserId: number | null = null;
-            for (const [uid, sid] of userSocketMap.entries()) {
-                if (sid === hostSocketId) hostUserId = parseInt(uid, 10);
-                if (sid === guestSocketId) guestUserId = parseInt(uid, 10);
+            const hostSocket = io.sockets.sockets.get(hostSocketId);
+            const guestSocket = io.sockets.sockets.get(guestSocketId);
+
+            const hostUserId = hostSocket?.data?.userId;
+            const guestUserId = guestSocket?.data?.userId;
+
+            if (!hostUserId || !guestUserId) {
+                logger.warn("User IDs missing", {
+                    hostSocketId,
+                    guestSocketId,
+                    hostUserId,
+                    guestUserId,
+                });
+
+                socket.emit("room:error", {
+                    message: "Players not registered properly",
+                });
+                return;
             }
 
             if (!hostUserId || !guestUserId) {
@@ -129,3 +142,4 @@ export function registerRoomEvents(io: Server, socket: Socket, roomManager: Room
         else { socket.emit("room:error", { message: "Room not found" }); }
     });
 }
+

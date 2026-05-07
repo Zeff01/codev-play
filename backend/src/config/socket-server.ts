@@ -26,6 +26,7 @@ export function initializeSocket(server: HTTPServer) {
     ioServer = io;
 
     io.on("connection", (socket) => {
+        
         const userId =
             (socket.handshake.query.userId as string) ||
             (socket.handshake.headers["user-id"] as string);
@@ -53,7 +54,6 @@ export function initializeSocket(server: HTTPServer) {
         registerGameEvents(io, socket, roomManager, userSocketMap);
         registerChatEvents(io, socket);
         registerDisconnectEvents(io, socket, roomManager);
-        registerChessEvents(io, socket, roomManager, userSocketMap);
     });
 
     io.on("connect_error", (err) => {
