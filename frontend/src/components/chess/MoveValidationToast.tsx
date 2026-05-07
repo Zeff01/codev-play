@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
-import type { ValidationResult } from "@/store/chess/useChessStore";
+import type { ValidationResult } from "@/types/chess.type";
 
 interface Props {
   result: ValidationResult | null;
