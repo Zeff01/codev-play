@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { MoveEntry } from "@/store/chess/useChessStore";
+import type { MoveEntry } from "@/types/chess.type";
 
 // Types
 

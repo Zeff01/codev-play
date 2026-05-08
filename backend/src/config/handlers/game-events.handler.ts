@@ -1,3 +1,4 @@
+
 import { Server, Socket } from "socket.io";
 import { RoomManager } from "@/utils/room-manager";
 import { TicTacToeService } from "@/services/tictactoe/tictactoe.service";
@@ -55,6 +56,8 @@ export function registerGameEvents(
   });
 
   socket.on("game:move", async (data: { gameId: string; gameType?: string; moveData: any }) => {
+        console.log("backend game:move received from", socket.id, "gameId:", data.gameId);
+
     try {
       const playerRoom = roomManager.getPlayerRoom(socket.id);
       if (!playerRoom) {
@@ -133,7 +136,7 @@ export function registerGameEvents(
       roomManager.setGameState(playerRoom.id, game);
 
       // Broadcast move to all players in game room
-      io.to(`game:${data.gameId}`).emit("game:move", {
+      socket.to(`game:${data.gameId}`).emit("game:move", {
         gameId: data.gameId,
         gameType,
         moveData: data.moveData,
@@ -144,6 +147,7 @@ export function registerGameEvents(
       logger.info(`User ${socket.id} made move in game ${data.gameId} (${gameType})`);
     } catch (err) {
       logger.error("Error making move", { error: err });
+      console.error("Full move error:", err);
       socket.emit("game:error", { message: "Failed to make move" });
     }
   });

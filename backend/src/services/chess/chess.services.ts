@@ -50,6 +50,8 @@ export class ChessService extends GameService<any> {
 
         const now = Date.now();
         const timeSpent = now - game.last_move_at;
+        console.log("time debug:", { now, last_move_at: game.last_move_at, timeSpent, white_time_left: game.white_time_left });
+
 
         // Deduct time
         if (game.current_turn === "w") {
@@ -102,7 +104,10 @@ export class ChessService extends GameService<any> {
             move: result.move
         });
 
-        return updatedGame;
+        return {
+            ...updatedGame,
+            move: result.move,
+        };
     }
 
     

@@ -1,8 +1,8 @@
-CREATE TABLE Games (
+CREATE TABLE games (
     game_id SERIAL PRIMARY KEY,
 
-    white_player_id INTEGER NOT NULL REFERENCES Users(id),
-    black_player_id INTEGER NOT NULL REFERENCES Users(id),
+    white_player_id INTEGER NOT NULL,
+    black_player_id INTEGER NOT NULL,
 
     start_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     end_time TIMESTAMP,
@@ -22,7 +22,8 @@ CREATE TABLE Games (
 
     current_turn CHAR(1) NOT NULL
         CHECK (current_turn IN ('w','b')),
-    is_check BOOLEAN,
+
+    is_check BOOLEAN DEFAULT false,
     draw_offer_by INTEGER,
     draw_status VARCHAR(20) DEFAULT 'none'
 );

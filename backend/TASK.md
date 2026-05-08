@@ -144,11 +144,11 @@ This document contains step-by-step tasks for implementing the backend API for C
 
 ### TASK-B403: Chess Real-time Features
 
-- [ ] Setup chess room events
-- [ ] Emit move updates
-- [ ] Add turn timer
-- [ ] Handle disconnection/reconnection
-- [ ] Broadcast game results
+- [x] Setup chess room events
+- [x] Emit move updates
+- [x] Add turn timer
+- [x] Handle disconnection/reconnection
+- [x] Broadcast game results
 
 ## Game: Pac-Man
 

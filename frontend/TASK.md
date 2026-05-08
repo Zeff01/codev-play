@@ -174,13 +174,13 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 
 ### TASK-F501: Chess UI Components
 
-- [ ] Install react-chess.js or create custom board
-- [ ] Create chessboard component
-- [ ] Design chess pieces
-- [ ] Add piece drag-and-drop
+- [x] Install react-chess.js or create custom board
+- [x] Create chessboard component
+- [x] Design chess pieces
+- [x] Add piece drag-and-drop
 - [x] Highlight legal moves
 - [x] Add move notation display
-- [ ] Create captured pieces display
+- [x] Create captured pieces display
 
 ### TASK-F502: Chess Game Page
 
@@ -194,12 +194,12 @@ This document contains step-by-step tasks for implementing the frontend UI for C
 
 ### TASK-F503: Chess Multiplayer
 
-- [ ] Create game lobby
-- [ ] Add player matching
-- [ ] Handle real-time moves
+- [x] Create game lobby
+- [x] Add player matching
+- [x] Handle real-time moves
 - [ ] Add spectator mode
-- [ ] Show opponent's time
-- [ ] Implement resign/draw buttons
+- [x] Show opponent's time
+- [x] Implement resign/draw buttons
 
 ## Game: Pac-Man
 
