@@ -14,6 +14,7 @@ export function useChessSocket() {
     useEffect(() => {
         if (!socket) return;
         if (storeSocket === socket) return; // already set, don't re-register listeners
+        console.log("setSocket called");
         setSocket(socket);
     }, [socket, setSocket, storeSocket]);
 }

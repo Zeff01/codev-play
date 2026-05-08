@@ -33,14 +33,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     const [rooms, setRooms] = useState<any[]>([]);
 
     useEffect(() => {
-        const userId =
-            localStorage.getItem("userId") ||
-            crypto.randomUUID();
-
+        const userId = localStorage.getItem("userId") ?? crypto.randomUUID();
         localStorage.setItem("userId", userId);
 
         const socket = io(process.env.NEXT_PUBLIC_API_URL!, {
             transports: ["websocket"],
+            query: { userId },
         });
 
         socketRef.current = socket;

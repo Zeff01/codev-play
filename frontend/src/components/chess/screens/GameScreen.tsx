@@ -40,6 +40,9 @@ export default function GameScreen() {
   const orientation = playerColor ?? "w";
   const opponentColor = orientation === "w" ? "b" : "w";
 
+  console.log("orientation:", orientation, "material:", material);
+  console.log("position:", position);
+
   const isGameOver =
     status === "checkmate" ||
     status === "stalemate" ||
@@ -101,11 +104,11 @@ export default function GameScreen() {
                 </Badge>
               </div>
               <div className="h-4 mt-0.5 flex items-center text-muted-foreground text-xs">
-                <CapturedPieces
+              <CapturedPieces
                   capturedPieces={material[opponentColor].captured}
                   advantage={material[opponentColor].advantage}
-                  capturedColor={opponentColor === "w" ? "b" : "w"}
-                />
+                  capturedColor={orientation}
+              />
               </div>
             </div>
           </div>
@@ -151,9 +154,9 @@ export default function GameScreen() {
               </div>
               <div className="h-4 mt-0.5 flex items-center text-muted-foreground text-xs">
                 <CapturedPieces
-                  capturedPieces={material[orientation].captured}
-                  advantage={material[orientation].advantage}
-                  capturedColor={orientation === "w" ? "b" : "w"}
+                    capturedPieces={material[orientation].captured}
+                    advantage={material[orientation].advantage}
+                    capturedColor={opponentColor}
                 />
               </div>
             </div>

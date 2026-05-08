@@ -27,9 +27,6 @@ export class ChessMovement {
             throw new Error("Not your turn!");
         }
 
-        // =====================================================
-        // ✅ FIX: ONLY USE FEN (NO PGN EVER)
-        // =====================================================
         const engine = new Chess(game.fen_position);
 
         // 2. Move execution
@@ -55,19 +52,23 @@ export class ChessMovement {
             to: moveResult.to,
             fenAfter: engine.fen(),
             piece: moveResult.piece,
-            capture: moveResult.captured || null,
+            capture: moveResult.captured ? true : false,
             promotion: moveResult.promotion || null,
             color: moveResult.color,
         });
 
         // 5. Update game state
-        const updateData = {
+        const dbStatus = ["repetition", "insufficient_material", "50_move_rule"].includes(statusResult.reason)
+        ? "draw"
+        : statusResult.reason;
+
+            const updateData = {
             fen_position: engine.fen(),
-            pgn_data: engine.pgn(), // optional for history only
+            pgn_data: engine.pgn(),
             current_turn: engine.turn(),
             is_check: engine.isCheck(),
             winner: statusResult.winner,
-            status: statusResult.reason,
+            status: statusResult.isDraw ? "draw" : statusResult.reason
         };
 
         await this.model.updateGameState(gameId, updateData);

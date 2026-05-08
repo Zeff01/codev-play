@@ -25,33 +25,39 @@ export class ChessModel extends GameModel<ChessData> {
 
   // 1️⃣ Create Game
     async createGame(gameData: ChessData): Promise<any> {
-            const query = `
-                INSERT INTO Games (
-                    white_player_id,
-                    black_player_id,
-                    status,
-                    time_control,
-                    pgn_data,
-                    fen_position,
-                    current_turn
-                )
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
-                RETURNING *;
-            `;
+    const query = `
+        INSERT INTO Games (
+            white_player_id,
+            black_player_id,
+            status,
+            time_control,
+            pgn_data,
+            fen_position,
+            current_turn,
+            white_time_left,
+            black_time_left,
+            last_move_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING *;
+    `;
 
     const values = [
-                gameData.white_player_id,
-                gameData.black_player_id,
-                gameData.status || 'ongoing',
-                gameData.time_control,
-                gameData.pgn_data || "",
-                gameData.fen_position || new Chess().fen(),
-                gameData.current_turn || "w"
-            ];
+        gameData.white_player_id,
+        gameData.black_player_id,
+        gameData.status || "ongoing",
+        gameData.time_control,
+        gameData.pgn_data || "",
+        gameData.fen_position || new Chess().fen(),
+        gameData.current_turn || "w",
+        gameData.white_time_left,
+        gameData.black_time_left,
+        gameData.last_move_at,
+    ];
 
     const result = await pool.query(query, values);
     return result.rows[0];
-  }
+}
 
   // 2️⃣ Get Game + Moves
   async getGameData(gameId: string): Promise<any> {
@@ -76,31 +82,28 @@ export class ChessModel extends GameModel<ChessData> {
 
   // 3️⃣ Update Game State
 async updateGameState(gameId: string, gameData: any): Promise<any> {
-  const query = `
-    UPDATE Games
-    SET
-      pgn_data = $1,
-      fen_position = $2,
-      current_turn = $3,
-      status = $4,      
-      winner = $5,      
-      is_check = $6    
-    WHERE game_id = $7
-    RETURNING *;
-  `;
+    const fields: string[] = [];
+    const values: any[] = [];
+    let i = 1;
 
-  const values = [
-    gameData.pgn,
-    gameData.fen_position, 
-    gameData.current_turn,
-    gameData.status,       
-    gameData.winner,
-    gameData.is_check,
-    gameId
-  ];
+    if (gameData.pgn !== undefined)           { fields.push(`pgn_data = $${i++}`);       values.push(gameData.pgn); }
+    if (gameData.fen_position !== undefined)  { fields.push(`fen_position = $${i++}`);   values.push(gameData.fen_position); }
+    if (gameData.current_turn !== undefined)  { fields.push(`current_turn = $${i++}`);   values.push(gameData.current_turn); }
+    if (gameData.status !== undefined)        { fields.push(`status = $${i++}`);          values.push(gameData.status); }
+    if (gameData.winner !== undefined)        { fields.push(`winner = $${i++}`);          values.push(gameData.winner); }
+    if (gameData.is_check !== undefined)      { fields.push(`is_check = $${i++}`);        values.push(gameData.is_check); }
+    if (gameData.white_time_left !== undefined){ fields.push(`white_time_left = $${i++}`);values.push(gameData.white_time_left); }
+    if (gameData.black_time_left !== undefined){ fields.push(`black_time_left = $${i++}`);values.push(gameData.black_time_left); }
+    if (gameData.last_move_at !== undefined)  { fields.push(`last_move_at = $${i++}`);   values.push(gameData.last_move_at); }
+    if (gameData.draw_status !== undefined)   { fields.push(`draw_status = $${i++}`);    values.push(gameData.draw_status); }
+    if (gameData.draw_offer_by !== undefined) { fields.push(`draw_offer_by = $${i++}`);  values.push(gameData.draw_offer_by); }
 
-  const result = await pool.query(query, values);
-  return result.rows[0];
+    if (fields.length === 0) throw new Error("No fields to update");
+
+    values.push(gameId);
+    const query = `UPDATE Games SET ${fields.join(", ")} WHERE game_id = $${i} RETURNING *`;
+    const result = await pool.query(query, values);
+    return result.rows[0];
 }
 
   // 4️⃣ Reset Game
@@ -187,7 +190,7 @@ async updateGameState(gameId: string, gameData: any): Promise<any> {
       data.from,
       data.to,
       data.piece || null,
-      data.capture || false,
+      data.capture ? true : false,
       data.promotion || null,
       data.notation,
       data.fenAfter

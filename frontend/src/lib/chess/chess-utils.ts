@@ -20,25 +20,19 @@ const STARTING_COUNTS: Record<PieceSymbol, number> = {
   q: 1,
 };
 
-export function getMaterialAdvantage(fen: string) {
-  const board = fen.split(" ")[0];
-
-  const counts = {
-    w: { p: 0, n: 0, b: 0, r: 0, q: 0 },
-    b: { p: 0, n: 0, b: 0, r: 0, q: 0 },
-  };
-
-  const isPiece = (c: string) => "pnbrq".includes(c);
-
-  for (const char of board) {
-    if (!isPiece(char)) continue;
-
-    if (char === char.toLowerCase()) {
-      counts.b[char as PieceSymbol]++;
-    } else {
-      counts.w[char.toLowerCase() as PieceSymbol]++;
+  export function getMaterialAdvantage(fen: string) {
+    const board = fen.split(" ")[0];
+    const counts = { w: { p: 0, n: 0, b: 0, r: 0, q: 0 }, b: { p: 0, n: 0, b: 0, r: 0, q: 0 } };
+    const isPiece = (c: string) => "pnbrq".includes(c);
+    for (const char of board) {
+        if (!isPiece(char.toLowerCase())) continue;
+        if (char === char.toLowerCase()) {
+            counts.b[char as PieceSymbol]++;
+        } else {
+            counts.w[char.toLowerCase() as PieceSymbol]++;
+        }
     }
-  }
+    console.log("counts:", JSON.stringify(counts));
 
   const wCaptured: PieceSymbol[] = [];
   const bCaptured: PieceSymbol[] = [];

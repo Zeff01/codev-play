@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Chess } from "chess.js";
 import type { ValidationResult, GameStatus } from "@/types/chess.type";
 import { cn } from "@/lib/utils";
@@ -60,6 +60,9 @@ export default function ChessBoard({
   } | null>(null);
   const [isFlashing, setIsFlashing] = useState(false);
 
+  // Prevents click handler from firing after a drag-and-drop move
+  const isDragging = useRef(false);
+
   const pieceMap = parseFen(position);
   const files = orientation === "w" ? FILES : [...FILES].reverse();
   const ranks = orientation === "w" ? RANKS : [...RANKS].reverse();
@@ -99,11 +102,10 @@ export default function ChessBoard({
         return;
       }
 
-      // Save the starting square in the drag event
+      isDragging.current = true;
       e.dataTransfer.setData("text/plain", square);
       e.dataTransfer.effectAllowed = "move";
 
-      // Instantly select the piece and show legal moves while dragging!
       if (pieceMap[square]) {
         setSelected(square);
         setLegalSquares(getLegalSquares(square, position));
@@ -113,7 +115,6 @@ export default function ChessBoard({
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
-    // We MUST prevent default here to tell the browser "yes, you can drop here"
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   }, []);
@@ -123,14 +124,13 @@ export default function ChessBoard({
       e.preventDefault();
       const sourceSquare = e.dataTransfer.getData("text/plain") as Square;
 
-      // If they dropped it somewhere weird or on the exact same square, cancel
       if (!sourceSquare || sourceSquare === targetSquare) {
         setSelected(null);
         setLegalSquares(new Set());
+        isDragging.current = false;
         return;
       }
 
-      // If they dropped it on a legal square, execute the move!
       if (legalSquares.has(targetSquare)) {
         const piece = pieceMap[sourceSquare];
         const isPromotion =
@@ -141,22 +141,31 @@ export default function ChessBoard({
           setPromotionPending({ from: sourceSquare, to: targetSquare });
           setSelected(null);
           setLegalSquares(new Set());
+          isDragging.current = false;
           return;
         }
 
         onMove(sourceSquare, targetSquare);
       }
 
-      // Reset the board selection after the drop
       setSelected(null);
       setLegalSquares(new Set());
+      // Reset after a short delay so the click event can check it first
+      setTimeout(() => { isDragging.current = false; }, 50);
     },
     [legalSquares, pieceMap, onMove],
   );
 
-  // --- CLICK HANDLER (Kept as a fallback for accessibility!) ---
+  // --- CLICK HANDLER ---
+
   const handleSquareClick = useCallback(
     (square: Square) => {
+      // Ignore click if it was triggered by a drag-and-drop
+      if (isDragging.current) {
+        isDragging.current = false;
+        return;
+      }
+
       if (disabled || promotionPending) return;
 
       if (selected && legalSquares.has(square)) {
@@ -249,7 +258,6 @@ export default function ChessBoard({
                   isCapture={legalSquares.has(square) && !!piece}
                   disabled={disabled}
                   onClick={() => handleSquareClick(square)}
-                  // Wire up our new Drag functions!
                   onDragStart={(e) => handleDragStart(e, square)}
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, square)}

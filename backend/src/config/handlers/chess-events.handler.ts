@@ -23,10 +23,10 @@ function startClockSync(io: Server, gameId: string, getGame: () => Promise<any>)
                 clockIntervals.delete(gameId);
                 return;
             }
-            io.to(`game:${gameId}`).emit("chess:clockSync", {
-                w: game.white_time_left,
-                b: game.black_time_left,
-            });
+        io.to(`game:${gameId}`).emit("chess:clockSync", {
+            w: Math.floor(game.white_time_left / 1000),
+            b: Math.floor(game.black_time_left / 1000),
+        });
         } catch {
             clearInterval(interval);
             clockIntervals.delete(gameId);

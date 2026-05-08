@@ -32,30 +32,42 @@ export const createGameSlice: StateCreator<ChessStore, [], [], GameSlice> = (set
     },
 
     makeMove: (from, to, promotion) => {
-        const state = get();
-        if (state.status !== "playing" && state.status !== "check") return;
-        try {
-            const move = chessEngine.move({ from, to, promotion });
-            if (!move) {
-                set({ lastValidation: { valid: false, reason: "Illegal move" } });
-                return;
-            }
-            const status = deriveStatus(chessEngine);
-            const moveNumber = Math.floor(state.moveHistory.length / 2) + 1;
-            set({
-                position: chessEngine.fen(),
-                activeColor: chessEngine.turn() as Color,
-                status,
-                lastValidation: { valid: true },
-                moveHistory: [
-                    ...state.moveHistory,
-                    { san: move.san, color: move.color as Color, moveNumber },
-                ],
-            });
-        } catch {
+        console.log("makeMove called", from, to, "playerColor:", get().playerColor, "activeColor:", get().activeColor);
+
+    const state = get();
+    if (state.status !== "playing" && state.status !== "check") return;
+    try {
+        const move = chessEngine.move({ from, to, promotion });
+        if (!move) {
             set({ lastValidation: { valid: false, reason: "Illegal move" } });
+            return;
         }
-    },
+        const status = deriveStatus(chessEngine);
+        const moveNumber = Math.floor(state.moveHistory.length / 2) + 1;
+        set({
+            position: chessEngine.fen(),
+            activeColor: chessEngine.turn() as Color,
+            status,
+            lastValidation: { valid: true },
+            moveHistory: [
+                ...state.moveHistory,
+                { san: move.san, color: move.color as Color, moveNumber },
+            ],
+        });
+
+        // Emit move to server
+        const { socket, gameId, playerColor } = get();
+          if (socket && gameId && playerColor === move.color) {
+              socket.emit("game:move", {
+                  gameId,
+                  gameType: "chess",
+                  moveData: { from, to, promotion },
+              });
+          }
+    } catch {
+        set({ lastValidation: { valid: false, reason: "Illegal move" } });
+    }
+},
 
     setValidation: (result) => set({ lastValidation: result }),
 

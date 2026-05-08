@@ -20,7 +20,7 @@ export const createSocketSlice: StateCreator<ChessStore, [], [], SocketSlice> = 
         }
 
         // prevent duplicate listeners
-        socket.removeAllListeners();
+        socket.off();
 
         set({
             socket,
@@ -103,15 +103,23 @@ export const createSocketSlice: StateCreator<ChessStore, [], [], SocketSlice> = 
         socket.on(
             "game:move",
             (data: { gameId: string; game: any; moveData: any }) => {
+                console.log("game:move received", data.game?.status, data.game?.is_check);
                 const game = data.game;
                 if (!game) return;
 
                 const { playerColor } = get();
 
                 const movingColor: Color =
-                    game.move?.color ?? (game.current_turn === "w" ? "b" : "w");
+                game.move?.color ?? (game.current_turn === "w" ? "b" : "w");
 
                 if (playerColor && movingColor === playerColor) return;
+
+                console.log("game:move debug", {
+                    playerColor: get().playerColor,
+                    movingColor,
+                    moveColor: game.move?.color,
+                    currentTurn: game.current_turn,
+                });
 
                 const statusMap: Record<string, GameStatus> = {
                     ongoing: "playing",
