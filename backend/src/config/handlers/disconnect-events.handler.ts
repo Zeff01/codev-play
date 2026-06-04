@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { RoomManager } from "@/utils/room-manager";
 import logger from "@/utils/logger";
+import { getUserIdFromSocket } from "../socket-server";
 
 export function registerDisconnectEvents(
     io: Server,

@@ -2,6 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { ApiResponse } from "@/utils/api-response";
 
+type UserPayload = {
+  id: string;
+  username: string;
+};
+
+
 export const auth = (req: Request, res: Response, next: NextFunction) => {
   try {
     const token =

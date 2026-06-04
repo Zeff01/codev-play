@@ -1,6 +1,7 @@
 import { GameService } from "../services/game.service";
 import { Request, Response } from "express";
 
+
 export class GameController<T extends GameService<any>> {
   constructor(protected service: T) {}
 

@@ -16,6 +16,8 @@
   "description": "Backend API for Codev-Play mini games",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "chess": "^1.5.1",
+    "chess.js": "^1.4.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

@@ -10,6 +10,8 @@ import {
 } from "./handlers";
 
 export const userSocketMap = new Map<string, string>();
+export const socketUserMap = new Map<string, string>();
+
 let ioServer: Server | undefined;
 export const roomManager = new RoomManager();
 
@@ -63,3 +65,8 @@ export const getIO = (): Server => {
     }
     return ioServer;
 };
+
+
+export function getUserIdFromSocket(socketId:string):string | undefined{
+  return socketUserMap.get(socketId)
+}
