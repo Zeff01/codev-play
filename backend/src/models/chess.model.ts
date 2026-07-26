@@ -1,204 +1,113 @@
 import { pool } from "@/config/db";
 import { GameModel } from "./game.model";
+import { ChessData } from "@/types/chess.type";
 import { Chess } from "chess.js";
-
-export interface ChessData {
-    fen_position: string;
-    pgn_data: string;
-    current_turn: 'w' | 'b';
-
-    white_player_id: number;
-    black_player_id: number;
-
-    time_control: string;
-    increment?:number;
-    white_time_left: number;
-    black_time_left: number;
-    last_move_at?: number;
-
-    status: string;
-    is_check: boolean;
-    winner: 'white' | 'black' | null;
-}
 
 export class ChessModel extends GameModel<ChessData> {
 
-  // 1️⃣ Create Game
-    async createGame(gameData: ChessData): Promise<any> {
-            const query = `
-                INSERT INTO Games (
-                    white_player_id,
-                    black_player_id,
-                    status,
-                    time_control,
-                    pgn_data,
-                    fen_position,
-                    current_turn
-                )
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
-                RETURNING *;
-            `;
+  async createGame(initialData: ChessData, userId: number): Promise<any> {
+    const result = await pool.query(
+      `INSERT INTO public.chess_game(
+          fen_position, pgn_data, current_turn,
+          white_player_id, black_player_id,
+          time_control, increment,
+          white_time_left, black_time_left,
+          status, is_check, winner
+        )
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        RETURNING *`,
+      [
+        initialData.fen_position,
+        initialData.pgn_data,
+        initialData.current_turn,
+        initialData.white_player_id ?? userId,
+        initialData.black_player_id,
+        initialData.time_control,
+        initialData.increment ?? null,
+        initialData.white_time_left,
+        initialData.black_time_left,
+        initialData.status,
+        initialData.is_check,
+        initialData.winner,
+      ]
+    );
 
-    const values = [
-                gameData.white_player_id,
-                gameData.black_player_id,
-                gameData.status || 'ongoing',
-                gameData.time_control,
-                gameData.pgn_data || "",
-                gameData.fen_position || new Chess().fen(),
-                gameData.current_turn || "w"
-            ];
-
-    const result = await pool.query(query, values);
     return result.rows[0];
   }
 
-  // 2️⃣ Get Game + Moves
   async getGameData(gameId: string): Promise<any> {
-
-    const query = `
-      SELECT g.*,
-      COALESCE(
-        (
-          SELECT json_agg(m.* ORDER BY m.move_number)
-          FROM Moves m
-          WHERE m.game_id = g.game_id
-        ),
-        '[]'
-      ) as moves
-      FROM Games g
-      WHERE g.game_id = $1;
-    `;
-
-    const result = await pool.query(query, [gameId]);
-    return result.rows[0];
-  }
-
-  // 3️⃣ Update Game State
-async updateGameState(gameId: string, gameData: any): Promise<any> {
-  const query = `
-    UPDATE Games
-    SET
-      pgn_data = $1,
-      fen_position = $2,
-      current_turn = $3,
-      status = $4,      
-      winner = $5,      
-      is_check = $6    
-    WHERE game_id = $7
-    RETURNING *;
-  `;
-
-  const values = [
-    gameData.pgn,
-    gameData.fen_position, 
-    gameData.current_turn,
-    gameData.status,       
-    gameData.winner,
-    gameData.is_check,
-    gameId
-  ];
-
-  const result = await pool.query(query, values);
-  return result.rows[0];
-}
-
-  // 4️⃣ Reset Game
-  async resetGame(gameId: string): Promise<any> {
-
-    await pool.query(
-      "DELETE FROM Moves WHERE game_id = $1",
+    const result = await pool.query(
+      `SELECT * FROM public.chess_game WHERE id = $1`,
       [gameId]
     );
 
-    const query = `
-      UPDATE Games
-      SET
-        pgn_data = '',
-        fen_position = $1,
-        current_turn = 'w',
-        status = 'ongoing',
-        start_time = CURRENT_TIMESTAMP
-      WHERE game_id = $2
-      RETURNING *;
-    `;
+    return result.rows[0];
+  }
 
-    const result = await pool.query(query, [
-      new Chess().fen(),
-      gameId
-    ]);
+  async updateGameState(gameId: string, gameData: ChessData): Promise<any> {
+    const result = await pool.query(
+      `UPDATE public.chess_game
+        SET fen_position = $1,
+            pgn_data = $2,
+            current_turn = $3,
+            white_time_left = $4,
+            black_time_left = $5,           
+            status = $7,
+            is_check = $8,
+            winner = $9,
+            time_control = $10,
+            white_player_id = $11,
+            black_player_id =$12
+            increment = $13
+            updated_at = NOW()
+        WHERE id = $10
+        RETURNING *`,
+      [
+        gameData.fen_position,
+        gameData.pgn_data,
+        gameData.current_turn,
+        gameData.white_time_left,
+        gameData.black_time_left,
+        gameData.status,
+        gameData.is_check,
+        gameData.winner,
+        gameData.time_control,
+        gameData.white_player_id,
+        gameData.black_player_id,
+        gameData.increment,
+        gameId,
+      ]
+    );
 
     return result.rows[0];
   }
 
-  // 5️⃣ Active Games
-  async getActiveGames(): Promise<any[]> {
+  async getActiveGames(): Promise<any> {
+    const result = await pool.query(
+      `SELECT * FROM public.chess_game WHERE status = 'active' ORDER BY last_move_at DESC NULLS LAST`
+    );
 
-    const query = `
-      SELECT
-        g.*,
-        u1.username as white_player,
-        u2.username as black_player
-      FROM Games g
-      JOIN Users u1 ON g.white_player_id = u1.id
-      JOIN Users u2 ON g.black_player_id = u2.id
-      WHERE g.status = 'ongoing'
-      ORDER BY g.start_time DESC;
-    `;
-
-    const result = await pool.query(query);
     return result.rows;
   }
 
-  // 6️⃣ Record Move
-  async recordMove(data:{
-    gameId: string,
-    moveNumber: number,
-    color: "w" | "b",
-    from: string,
-    to: string,
-    notation: string,
-    fenAfter: string,
-    piece?: string,
-    capture?: string | null,
-    promotion?: string | null,
-  }): Promise<void> {
+  async resetGame(gameId: string): Promise<any> {
+    const startingChess = new Chess();
 
-    const query = `
-      INSERT INTO Moves (
-        game_id,
-        move_number,
-        player_color,
-        from_square,
-        to_square,
-        piece,
-        capture,
-        promotion,
-        notation,
-        fen_after
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);
-    `;
+    const result = await pool.query(
+      `UPDATE public.chess_game
+        SET fen_position = $1,
+            pgn_data = $2,
+            current_turn = 'w',
+            status = 'active',
+            is_check = false,
+            winner = NULL,
+            updated_at = NOW()
+        WHERE id = $3
+        RETURNING *`,
+      [startingChess.fen(), startingChess.pgn(), gameId]
+    );
 
-    await pool.query(query, [
-      data.gameId,
-      data.moveNumber,
-      data.color,
-      data.from,
-      data.to,
-      data.piece || null,
-      data.capture || false,
-      data.promotion || null,
-      data.notation,
-      data.fenAfter
-    ]);
+    return result.rows[0];
   }
 
-  async getMoveHistory(gameId:string){
-      const query = `SELECT * FROM Moves WHERE game_id = $1 ORDER BY move_number ASC`;
-      const result = await pool.query(query, [gameId]);
-      return result.rows;
-  }
 }
-
-

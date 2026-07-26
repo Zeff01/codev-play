@@ -3,6 +3,7 @@ import { Chess } from "chess.js";
 import type { ChessStore, GameSlice } from "./store.types";
 import type { Color } from "@/types/chess.type";
 import { deriveStatus, INITIAL_FEN } from "@/lib/chess/chess-utils";
+import { Socket } from "socket.io-client";
 
 // Engine sits outside the state, just like before
 const chessEngine = new Chess();
@@ -18,6 +19,8 @@ export const createGameSlice: StateCreator<ChessStore, [], [], GameSlice> = (
   lastValidation: null,
   playerColor: null,
   clocks: { w: 600, b: 600 },
+  socket: null,
+  setSocket: (socket) => set({ socket }),
 
   startGame: (playerColor, timeControl) => {
     chessEngine.reset();
@@ -35,7 +38,10 @@ export const createGameSlice: StateCreator<ChessStore, [], [], GameSlice> = (
 
   makeMove: (from, to, promotion) => {
     const state = get();
-    if (state.status !== "playing" && state.status !== "check") return;
+    if (state.status !== "playing" && state.status !== "check") {
+      set({ lastValidation: { valid: false, reason: "Game is not active" } });
+      return;
+    }
 
     try {
       const move = chessEngine.move({ from, to, promotion });
@@ -43,6 +49,7 @@ export const createGameSlice: StateCreator<ChessStore, [], [], GameSlice> = (
       if (!move) {
         set({ lastValidation: { valid: false, reason: "Illegal move" } });
         return;
+        
       }
       const status = deriveStatus(chessEngine);
       const moveNumber = Math.floor(state.moveHistory.length / 2) + 1;
@@ -57,7 +64,16 @@ export const createGameSlice: StateCreator<ChessStore, [], [], GameSlice> = (
           { san: move.san, color: move.color as Color, moveNumber },
         ],
       });
-    } catch {
+
+      state.socket?.emit("chess:move", {
+        from,
+        to,
+        promotion,
+      });
+
+
+    } catch (err) {
+      console.error("Error making move", err);
       set({ lastValidation: { valid: false, reason: "Illegal move" } });
     }
   },

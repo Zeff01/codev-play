@@ -9,7 +9,9 @@ import { ChessSocket } from "@/sockets/chess.socket";
 import { GameDisconnectHandler } from "@/services/chess/chess.disconnecthandler";
 import { TicTacToeSocket } from "@/sockets/tictactoe.socket";
 
-const tttService = new TicTacToeService(new ticTacToeModel(), new TicTacToeSocket());
+
+
+const tttService = new TicTacToeService(new ticTacToeModel());
 const chessService = new ChessService(new ChessSocket(), new ChessModel());
 
 // Game service registry for different game types
@@ -103,11 +105,7 @@ export function registerGameEvents(
             data.moveData.col,
           );
           break;
-        case "chess":
-            if (!data.moveData?.from || !data.moveData?.to) {
-              socket.emit("game:error", { message: "Invalid move data for Chess" });
-              return;
-            }
+
 
         case "chess":
           // Chess move: { from, to, promotion }

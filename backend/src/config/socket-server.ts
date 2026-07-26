@@ -51,6 +51,7 @@ export function initializeSocket(server: HTTPServer) {
         registerChatEvents(io, socket);
         registerDisconnectEvents(io, socket, roomManager);
     });
+    
 
     io.on("connect_error", (err) => {
         logger.error("Global socket connection error", { error: err });
@@ -70,3 +71,9 @@ export const getIO = (): Server => {
 export function getUserIdFromSocket(socketId:string):string | undefined{
   return socketUserMap.get(socketId)
 }
+
+
+  // Initialize game services here if needed
+  // For example, you can set up event listeners for specific game types
+  // or initialize game state management.
+  // This function can be expanded as the application grows.

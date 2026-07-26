@@ -1,7 +1,26 @@
+export interface ChessData {
+    fen_position: string;
+    pgn_data: string;
+    current_turn: 'w' | 'b';
+
+    white_player_id: number;
+    black_player_id: number;
+
+    time_control: string;
+    increment?:number;
+    white_time_left: number;
+    black_time_left: number;
+
+    status: string;
+    is_check: boolean;
+    winner: 'white' | 'black' | null;
+}
+
+
 import { Color } from "chess.js";
 
 export type GameStatus = 
-    | 'ongoing' | 'checkmate' | 'stalemate' | 'repetition' 
+    | 'playing' | 'checkmate' | 'stalemate' | 'repetition' 
     | 'insufficient_material' | '50_move_rule' | 'timeout' 
     | 'timeout_with_insufficient_material' | 'draw';
 

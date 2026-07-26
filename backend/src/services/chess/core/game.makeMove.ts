@@ -1,14 +1,17 @@
 import { Chess } from "chess.js";
 import { ChessModel } from "@/models/chess.model";
 import getGameStatus from "./game.getstatus";
+import { timeEnd } from "console";
 
 export class ChessMovement {
     private model = new ChessModel();
 
     async execute(gameId: string, playerId: number, from: string, to: string, promotion?: string) {
         const game = await this.model.getGameData(gameId);
+        const now = Date.now();
+        const timeSpent = now - game.last_move_at;
         if (!game) throw new Error("Game not found!");
-        if (game.status !== "ongoing") throw new Error("Game already finished");
+        if (game.status !== "playing") throw new Error("Game already finished");
 
         // 1. Turn Validation
         const expectedPlayerId = game.current_turn === 'w' ? game.white_player_id : game.black_player_id;
@@ -26,10 +29,7 @@ export class ChessMovement {
         } catch (e) {
            
             engine.load(game.fen_position);
-        }
-
-            
-
+        }            
         // 2. Move Execution
         const moveResult = engine.move({ 
             from, 
@@ -38,20 +38,16 @@ export class ChessMovement {
         });
 
         if (!moveResult) throw new Error("Invalid move");
+        const isWhiteMoving = game.current_turn === 'w';
 
-        // 3. Record Move History (Async pero hihintayin natin)
-        await this.model.recordMove({
-            gameId,
-            moveNumber: engine.history().length,
-            notation: moveResult.san,
-            from: moveResult.from,
-            to: moveResult.to,
-            fenAfter: engine.fen(),
-            piece: moveResult.piece,
-            capture: (moveResult.captured as string) || null,
-            promotion: (moveResult.promotion as string) || null,
-            color: moveResult.color
-        });
+        const white_time_left = isWhiteMoving
+            ? game.white_time_left - timeSpent + (game.increment ?? 0) * 1000
+            : game.white_time_left;
+
+        const black_time_left = !isWhiteMoving
+            ? game.black_time_left - timeSpent+ (game.increment ?? 0) * 1000
+            : game.black_time_left;
+
 
         // 4. Update Main Game State
         const statusResult = getGameStatus(engine);
@@ -59,9 +55,16 @@ export class ChessMovement {
             fen_position: engine.fen(),
             pgn_data: engine.pgn(),
             current_turn: engine.turn(),
+            time_control:game.time_control,
+            increment: game.increment,
+            white_time_left,
+            black_time_left, 
             is_check: engine.inCheck(),
             winner: statusResult.winner,
-            status: statusResult.reason
+            status: statusResult.reason,
+            white_player_id:game.white_player_id,
+            black_player_id:game.black_player_id
+            
         };
 
         await this.model.updateGameState(gameId, updateData);

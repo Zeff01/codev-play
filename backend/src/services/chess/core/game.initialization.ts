@@ -2,7 +2,8 @@
 
 import { Chess } from "chess.js";
 import { ChessModel } from "@/models/chess.model";
-import { ChessData } from "@/models/chess.model";
+import { ChessData } from "@/types/chess.type";
+
 
 export class ChessBoardInitialize {
     private model = new ChessModel();
@@ -15,9 +16,12 @@ export class ChessBoardInitialize {
         if (!whiteID || !blackID) {
             throw new Error("Both players required");
             }
+        if (!Number.isInteger(whiteID) || !Number.isInteger(blackID) || whiteID <= 0 || blackID <= 0) {
+            throw new Error("Invalid player IDs");
+        }
         
         const engine = new Chess();
-        
+
       
         const [base, increment] = timeControl.split("+").map(Number);
 
@@ -28,18 +32,19 @@ export class ChessBoardInitialize {
             white_player_id: whiteID,
             black_player_id: blackID,
             time_control: timeControl,
+             increment: increment || 0,
             
 
             white_time_left: base * 60 * 1000,
             black_time_left: base * 60 * 1000,
             last_move_at: Date.now(),
 
-            status: "ongoing",
+            status: "playing",
             is_check: false,
             winner: null
         };
 
-        return await this.model.createGame(initialData);
+        return await this.model.createGame(initialData, whiteID);
     }
 }
 

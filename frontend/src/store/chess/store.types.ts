@@ -6,6 +6,7 @@ import type {
   ValidationResult,
   Room,
 } from "@/types/chess.type";
+import type { Socket } from "socket.io-client";
 
 export interface RoomSlice {
   phase: ChessPhase;
@@ -18,6 +19,8 @@ export interface RoomSlice {
 }
 
 export interface GameSlice {
+  socket:null | any;
+  setSocket: (socket: Socket) => void;
   position: string;
   activeColor: Color;
   status: GameStatus;

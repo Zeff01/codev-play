@@ -46,40 +46,9 @@ export class ChessService extends GameService<any> {
     }
     async playMove(gameId: string, playerId: number, from: string, to: string, promotion?:string) {
 
-        const game = await this.chessModel.getGameData(gameId);
-
-        const now = Date.now();
-        const timeSpent = now - game.last_move_at;
-
-        // Deduct time
-        if (game.current_turn === "w") {
-            game.white_time_left -= timeSpent;
-        } else {
-            game.black_time_left -= timeSpent;
-        }
-
-        // Timeout check
-        if (game.white_time_left <= 0) {
-            const updated = await this.chessModel.updateGameState(gameId, {
-                status: "timeout",
-                winner: "black"
-            });
-            this.chessSocket.emitGameEnd(updated);
-            return updated;
-        }
-
-        if (game.black_time_left <= 0) {
-            const updated = await this.chessModel.updateGameState(gameId, {
-                status: "timeout",
-                winner: "white"
-            });
-            this.chessSocket.emitGameEnd(updated);
-            return updated;
-        }
-
+        const game = await this.chessModel.getGameData(gameId);     
         // Execute move
-        const result = await this.movement.execute(gameId, playerId, from, to);
-
+        const result = await this.movement.execute(gameId, playerId, from, to, promotion);
         // Add increment
         const { incrementMs } = this.parseTimeControl(game.time_control);
 
@@ -89,12 +58,6 @@ export class ChessService extends GameService<any> {
             game.black_time_left += incrementMs;
         }
 
-        // Update DB
-        const updatedGame = await this.chessModel.updateGameState(gameId, {
-            white_time_left: game.white_time_left,
-            black_time_left: game.black_time_left,
-            last_move_at: Date.now()
-        });
 
         // Emit
         this.chessSocket.chessPlayerMoved({
@@ -148,11 +111,11 @@ export class ChessService extends GameService<any> {
         if (game.last_draw_offer_at && Date.now() - game.last_draw_offer_at < 10000) {
             throw new Error("Wait before offering again");
 }
-        await this.chessModel.updateGameState(gameId, {
+        const updatedGame = await this.chessModel.updateGameState(gameId, {
         draw_status: "pending",
         draw_offer_by: playerId
     });
-    this.chessSocket.chessDraw(game)
+    this.chessSocket.chessDraw(updatedGame)
     return { message: "Draw offered" };
     }
 

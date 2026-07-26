@@ -3,6 +3,8 @@ import { getIO } from "@/config/socket-server";
 import { RPSType } from "@/types/rps.types";
 
 export class TicTacToeSocket {
+  
+
   async TicTacToePlayerJoined(game: RPSType, userId: number) {
     const socketId = userSocketMap.get(String(userId));
     console.log(socketId);
