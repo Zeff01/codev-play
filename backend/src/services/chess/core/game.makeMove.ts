@@ -2,16 +2,19 @@ import { Chess } from "chess.js";
 import { ChessModel } from "@/models/chess.model";
 import getGameStatus from "./game.getstatus";
 import { timeEnd } from "console";
+import { ChessData } from "@/types/chess.type";
 
 export class ChessMovement {
     private model = new ChessModel();
 
     async execute(gameId: string, playerId: number, from: string, to: string, promotion?: string) {
         const game = await this.model.getGameData(gameId);
-        const now = Date.now();
-        const timeSpent = now - game.last_move_at;
         if (!game) throw new Error("Game not found!");
         if (game.status !== "playing") throw new Error("Game already finished");
+        
+        const now = new Date();
+        const timeSpent = now.getTime() - new Date(game.last_move_at).getTime();
+        
 
         // 1. Turn Validation
         const expectedPlayerId = game.current_turn === 'w' ? game.white_player_id : game.black_player_id;
@@ -51,7 +54,7 @@ export class ChessMovement {
 
         // 4. Update Main Game State
         const statusResult = getGameStatus(engine);
-        const updateData = {
+        const updateData:ChessData= {
             fen_position: engine.fen(),
             pgn_data: engine.pgn(),
             current_turn: engine.turn(),
@@ -63,8 +66,12 @@ export class ChessMovement {
             winner: statusResult.winner,
             status: statusResult.reason,
             white_player_id:game.white_player_id,
-            black_player_id:game.black_player_id
+            black_player_id:game.black_player_id,
+            last_move_at:now,
+            draw_offer_by: playerId,
+            draw_status:'none',
             
+
         };
 
         await this.model.updateGameState(gameId, updateData);

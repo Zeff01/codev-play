@@ -13,7 +13,12 @@ export interface ChessData {
 
     status: string;
     is_check: boolean;
+    last_move_at:Date;
     winner: 'white' | 'black' | null;
+
+    draw_offer_by: number,
+    draw_status:string,
+    
 }
 
 

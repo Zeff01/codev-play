@@ -25,39 +25,37 @@ export class GameDisconnectHandler {
     }
 
     const timer = setTimeout(async () => {
+     try{
       const game = await this.chessService.fetchGame(gameId);
-      if (!game || game.status !== "ongoing") return;
+      if (!game || game.status !== "playing") return;
 
       const isWhite = game.white_player_id === userId;
       const winner = isWhite ? "black" : "white";
 
       const updatedGame = await this.chessModel.updateGameState(gameId, {
-        status: "disconnect",
+        ...game,
+        status: "disconnected",
         winner,
       });
       
       
       this.chessSocket.emitGameEnd(updatedGame);
-       this.io.to(`game:${gameId}`).emit("game:result", {
-        gameId,
-        winner,       
-        game,         
-});
-
-      disconnectTimers.delete(key);
-    }, 60000
-
-);
-
+    } catch (err) {
+        console.error(`Disconnect handler failed for game ${gameId}, user ${userId}:`, err);
+    } finally {
+        disconnectTimers.delete(key);
+      }
+    }, 60000);
+    
     disconnectTimers.set(key, timer);
   }
 
-    handleReconnect(gameId:string, userId:number){
-        const key = `${gameId}:${userId}`;
-        if(disconnectTimers.has(key)){
-            clearTimeout(disconnectTimers.get(key)!)
-            disconnectTimers.delete(key)
-        }
+  handleReconnect(gameId:string, userId:number){
+    const key = `${gameId}:${userId}`;
+    if(disconnectTimers.has(key)){
+      clearTimeout(disconnectTimers.get(key)!)
+      disconnectTimers.delete(key)
+      }
     }
 
 }
