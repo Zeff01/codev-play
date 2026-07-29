@@ -55,6 +55,7 @@ export class ChessMovement {
         // 4. Update Main Game State
         const statusResult = getGameStatus(engine);
         const updateData:ChessData= {
+            game_id:Number(gameId),
             fen_position: engine.fen(),
             pgn_data: engine.pgn(),
             current_turn: engine.turn(),
@@ -68,7 +69,7 @@ export class ChessMovement {
             white_player_id:game.white_player_id,
             black_player_id:game.black_player_id,
             last_move_at:now,
-            draw_offer_by: playerId,
+            draw_offer_by: null,
             draw_status:'none',
             
 

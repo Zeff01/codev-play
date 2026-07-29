@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { ChessService } from "@/services/chess/chess.services";
 import { GameController } from "./game.controller";
 
@@ -8,7 +8,7 @@ export class ChessController extends GameController<ChessService> {
         super(service)
     }
 
-    async makeMoveController(req:Request<{gameId:string},{},{from:string, to:string, promotion:string}>, res:Response):Promise<void>{
+    async makeMoveController(req:Request<{gameId:string},{},{from:string, to:string, promotion?:string}>, res:Response):Promise<void>{
        try {
         const { gameId } = req.params
         const playerId = Number(req.user!.id)

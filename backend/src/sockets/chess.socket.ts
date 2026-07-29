@@ -1,44 +1,26 @@
-
 import { getIO } from "@/config/socket-server";
+import { ChessData } from "@/types/chess.type";
 
 export class ChessSocket {
 
-  private emitToGameRoom(gameId: string, event: string, payload: any) {
+  private emitToGameRoom(gameId: string | number, event: string, payload: ChessData) {
     getIO().to(`game:${gameId}`).emit(event, payload);
   }
 
-  chessPlayerJoined(game: any) {
-    this.emitToGameRoom(game.id, "chess:join", game);
+  chessPlayerJoined(game: ChessData) {
+    this.emitToGameRoom(game.game_id, "chess:join", game);
   }
 
-  chessPlayerMoved(game: any) {
-    this.emitToGameRoom(game.id, "chess:move", game);
+  chessPlayerMoved(game: ChessData) {
+    this.emitToGameRoom(game.game_id, "chess:move", game);
   }
 
-  emitGameEnd(game: any) {
-    this.emitToGameRoom(game.id, "chess:end", {
-      status: game.status,
-      winner: game.winner,
-      game
-    });
-
-    this.emitToGameRoom(game.id, "game:result", {
-      gameId: game.id,
-      gameType: "chess",
-      status: game.status,
-      winner: game.winner,
-      game
-    });
+  emitGameEnd(game: ChessData) {
+    this.emitToGameRoom(game.game_id, "chess:end", game);
+    this.emitToGameRoom(game.game_id, "game:result", game);
   }
 
-  chessDraw(game: any){
-    this.emitToGameRoom(game.id, "chess:draw", {
-      drawStatus:game.draw_status,
-      offeredBy:game.draw_offer_by,
-      status:game.status,
-      game
-    })
+  chessDraw(game: ChessData) {
+    this.emitToGameRoom(game.game_id, "chess:draw", game);
   }
-
-
 }

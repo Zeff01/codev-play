@@ -5,7 +5,7 @@ import { Chess } from "chess.js";
 
 export class ChessModel extends GameModel<ChessData> {
 
-  async createGame(initialData: ChessData, userId: number): Promise<any> {
+  async createGame(initialData: Omit<ChessData,'game_id'>, userId: number): Promise<ChessData> {
     const result = await pool.query(
       `INSERT INTO public.chess_game(
           fen_position, pgn_data, current_turn,
@@ -38,7 +38,7 @@ export class ChessModel extends GameModel<ChessData> {
     return result.rows[0];
   }
 
-  async getGameData(gameId: string): Promise<any> {
+  async getGameData(gameId: string): Promise<ChessData> {
     const result = await pool.query(
       `SELECT * FROM public.chess_game WHERE id = $1`,
       [gameId]
@@ -47,7 +47,7 @@ export class ChessModel extends GameModel<ChessData> {
     return result.rows[0];
   }
 
-async updateGameState(gameId: string, gameData: ChessData): Promise<any> {
+async updateGameState(gameId: string, gameData: ChessData): Promise<ChessData> {
   const result = await pool.query(
     `UPDATE public.chess_game
       SET fen_position = $1,
@@ -90,15 +90,15 @@ async updateGameState(gameId: string, gameData: ChessData): Promise<any> {
 }
 
 
-  async getActiveGames(): Promise<any> {
+  async getActiveGames(): Promise<ChessData> {
     const result = await pool.query(
       `SELECT * FROM public.chess_game WHERE status = 'active' ORDER BY last_move_at DESC NULLS LAST`
     );
 
-    return result.rows;
+    return result.rows[0];
   }
 
-  async resetGame(gameId: string): Promise<any> {
+  async resetGame(gameId: string): Promise<ChessData> {
     const startingChess = new Chess();
 
     const result = await pool.query(

@@ -12,6 +12,7 @@ import {
 export const userSocketMap = new Map<string, string>();
 export const socketUserMap = new Map<string, string>();
 
+
 let ioServer: Server | undefined;
 export const roomManager = new RoomManager();
 
@@ -35,6 +36,7 @@ export function initializeSocket(server: HTTPServer) {
 
         if (userId) {
             userSocketMap.set(userId, socket.id);
+            socketUserMap.set(socket.id, userId);
         }
 
         console.log("A user connected", socket.id, userSocketMap);

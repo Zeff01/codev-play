@@ -1,4 +1,5 @@
 export interface ChessData {
+    game_id:number,
     fen_position: string;
     pgn_data: string;
     current_turn: 'w' | 'b';
@@ -16,7 +17,7 @@ export interface ChessData {
     last_move_at:Date;
     winner: 'white' | 'black' | null;
 
-    draw_offer_by: number,
+    draw_offer_by: number | null,
     draw_status:string,
     
 }

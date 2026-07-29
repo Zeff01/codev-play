@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { RoomManager } from "@/utils/room-manager";
 import logger from "@/utils/logger";
-import { getUserIdFromSocket } from "../socket-server";
+import { getUserIdFromSocket,userSocketMap,socketUserMap } from "../socket-server";
 
 export function registerDisconnectEvents(
     io: Server,
@@ -11,6 +11,11 @@ export function registerDisconnectEvents(
     socket.on("disconnect", (reason) => {
         logger.info(`User ${socket.id} disconnected`, { reason });
 
+        const userId = getUserIdFromSocket(socket.id);
+        if (userId) {
+            userSocketMap.delete(userId);
+        }
+            socketUserMap.delete(socket.id);
         // Find and leave any room the player was in
         const playerRoom = roomManager.getPlayerRoom(socket.id);
         if (playerRoom) {

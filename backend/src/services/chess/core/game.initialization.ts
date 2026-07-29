@@ -25,7 +25,8 @@ export class ChessBoardInitialize {
       
         const [base, increment] = timeControl.split("+").map(Number);
 
-        const initialData: ChessData = {
+        const initialData: Omit<ChessData, 'game_id'> = {
+
             fen_position: engine.fen(),
             pgn_data: "",
             current_turn: "w",
@@ -37,11 +38,13 @@ export class ChessBoardInitialize {
 
             white_time_left: base * 60 * 1000,
             black_time_left: base * 60 * 1000,
-            last_move_at: Date.now(),
+            last_move_at: new Date(),
 
             status: "playing",
             is_check: false,
-            winner: null
+            winner: null,
+            draw_offer_by: null,
+            draw_status: "No Draw Offered"
         };
 
         return await this.model.createGame(initialData, whiteID);

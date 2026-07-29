@@ -32,7 +32,7 @@ export class ChessService extends GameService<any> {
     async startGame(gameData: any, userId: number) {
         const {blackPlayerId, timeControl } = gameData
         
-        const game = this.initializer.execute(userId, blackPlayerId, timeControl);
+        const game = await this.initializer.execute(userId, blackPlayerId, timeControl);
         this.chessSocket.chessPlayerJoined(game);
         return game;
     }
@@ -53,7 +53,6 @@ export class ChessService extends GameService<any> {
         // Emit
         this.chessSocket.chessPlayerMoved({
             ...updatedGame,
-            move: result.move
         });
 
         return updatedGame;

@@ -66,9 +66,9 @@ export const createGameSlice: StateCreator<ChessStore, [], [], GameSlice> = (
       });
 
       state.socket?.emit("chess:move", {
-        from,
-        to,
-        promotion,
+        gameId: state.currentRoom,
+        gameType: "chess",
+        moveData:{from, to, promotion}
       });
 
 
