@@ -80,7 +80,11 @@ export function registerGameEvents(
       }
 
       // Determine game type and get appropriate service
-      const gameType = data.gameType || playerRoom.gameType || "tictactoe";
+      const gameType = data.gameType || playerRoom.gameType;
+      if (!gameType) {
+        socket.emit("game:error", { message: "Game type is required to make a move" });
+        return;
+      }
       const gameService = gameServices[gameType as keyof typeof gameServices];
 
       if (!gameService) {
@@ -147,6 +151,7 @@ export function registerGameEvents(
 
       logger.info(`User ${socket.id} made move in game ${data.gameId} (${gameType})`);
     } catch (err) {
+      console.error("MAKE MOVE ERROR:", err);
       logger.error("Error making move", { error: err });
       socket.emit("game:error", { message: "Failed to make move" });
     }

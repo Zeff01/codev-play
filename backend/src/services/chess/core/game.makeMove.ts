@@ -13,7 +13,8 @@ export class ChessMovement {
         if (game.status !== "playing") throw new Error("Game already finished");
         
         const now = new Date();
-        const timeSpent = now.getTime() - new Date(game.last_move_at).getTime();
+        const lastMoveAt = game.last_move_at ? new Date(game.last_move_at) : now;
+        const timeSpent = Math.max(0, now.getTime() - lastMoveAt.getTime());
         
 
         // 1. Turn Validation

@@ -1,7 +1,14 @@
 import { Server, Socket } from "socket.io";
 import { RoomManager } from "@/utils/room-manager";
 import logger from "@/utils/logger";
+import { startChessMatch } from "@/config/handlers/Startchessmatch";
+import { ChessService } from "@/services/chess/chess.services";
+import { ChessSocket } from "@/sockets/chess.socket";
+import { ChessModel } from "@/models/chess.model";
+import { getUserIdFromSocket } from "../socket-server";
 
+
+const chessService = new ChessService(new ChessSocket(), new ChessModel());
 export function registerRoomEvents(
     io: Server,
     socket: Socket,
@@ -55,6 +62,19 @@ export function registerRoomEvents(
             socket.join(data.roomId);
 
             const room = roomManager.getRoom(data.roomId);
+            if (room?.gameId) {
+        // Game already started — only the two original players may (re)join
+                const userId = getUserIdFromSocket(socket.id);
+                const isOriginalPlayer = chessService
+                    .fetchGame(room.gameId)
+                    .then((game) => {
+                        return game.whitePlayerId === userId || game.blackPlayerId === userId;
+                    });
+                if (!isOriginalPlayer) {
+                    socket.emit("room:error", { message: "This match has already started" });
+                    return;
+                }
+            }
             socket.emit("room:joined", {
                 success: true,
                 room: roomManager.getRoomInfo(data.roomId),
@@ -109,7 +129,7 @@ export function registerRoomEvents(
     });
 
     // host starts match within room
-    socket.on("room:start", (data: { roomId: string }) => {
+    socket.on("room:start", async (data: { roomId: string }) => {
         try {
             const roomInfo = roomManager.getRoomInfo(data.roomId);
             if (!roomInfo) {
@@ -117,35 +137,43 @@ export function registerRoomEvents(
                 return;
             }
 
-            // broadcast to everyone in the room that game is starting
+            if (roomInfo.gameType === "chess") {
+                await startChessMatch(io, roomManager, chessService, data.roomId);
+                return;
+            }
+
+            // existing behavior preserved for all other game types
             io.to(data.roomId).emit("match:started");
         } catch (err) {
+            console.error("STARTMATCH ERROR:", err);
             logger.error("Error starting match", { error: err });
-            socket.emit("room:error", { message: "Failed to start match" });
-        }
-    });
-
-    socket.on(
-        "rooms:get",
-        (data?: { gameType?: "tictactoe" | "snake" | "rps" | "chess" }) => {
-            const filteredRooms = roomManager
-                .listRooms()
-                .filter((room) =>
-                    data?.gameType ? room.gameType === data.gameType : true,
-                );
-            socket.emit("rooms:list", {
-                gameType: data?.gameType,
-                rooms: filteredRooms,
+            socket.emit("room:error", {
+                message: err instanceof Error ? err.message : "Failed to start match",
             });
-        },
-    );
-
-    socket.on("room:get", (data: { roomId: string }) => {
-        const roomInfo = roomManager.getRoomInfo(data.roomId);
-        if (roomInfo) {
-            socket.emit("room:info", roomInfo);
-        } else {
-            socket.emit("room:error", { message: "Room not found" });
         }
     });
-}
+
+        socket.on(
+            "rooms:get",
+            (data?: { gameType?: "tictactoe" | "snake" | "rps" | "chess" }) => {
+                const filteredRooms = roomManager
+                    .listRooms()
+                    .filter((room) =>
+                        data?.gameType ? room.gameType === data.gameType : true,
+                    );
+                socket.emit("rooms:list", {
+                    gameType: data?.gameType,
+                    rooms: filteredRooms,
+                });
+            },
+        );
+
+        socket.on("room:get", (data: { roomId: string }) => {
+            const roomInfo = roomManager.getRoomInfo(data.roomId);
+            if (roomInfo) {
+                socket.emit("room:info", roomInfo);
+            } else {
+                socket.emit("room:error", { message: "Room not found" });
+            }
+        });
+    }

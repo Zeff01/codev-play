@@ -12,9 +12,10 @@ export class ChessModel extends GameModel<ChessData> {
           white_player_id, black_player_id,
           time_control, increment,
           white_time_left, black_time_left,
-          status, is_check,winner, draw_offer_by, draw_status
+          status, is_check,winner, draw_offer_by, draw_status,
+          last_move_at
         )
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
         RETURNING *`,
       [
         initialData.fen_position,
@@ -31,6 +32,7 @@ export class ChessModel extends GameModel<ChessData> {
         initialData.winner,
         initialData.draw_offer_by,
         initialData.draw_status,
+        new Date()
         
       ]
     );
@@ -40,7 +42,7 @@ export class ChessModel extends GameModel<ChessData> {
 
   async getGameData(gameId: string): Promise<ChessData> {
     const result = await pool.query(
-      `SELECT * FROM public.chess_game WHERE id = $1`,
+      `SELECT * FROM public.chess_game WHERE game_id = $1`,
       [gameId]
     );
 
@@ -66,7 +68,7 @@ async updateGameState(gameId: string, gameData: ChessData): Promise<ChessData> {
           draw_status = $14,
           draw_offer_by = $15,
           updated_at = NOW()
-      WHERE id = $16
+      WHERE game_id = $16
       RETURNING *`,
     [
       gameData.fen_position,
@@ -82,6 +84,8 @@ async updateGameState(gameId: string, gameData: ChessData): Promise<ChessData> {
       gameData.black_player_id,
       gameData.increment,
       gameData.last_move_at,
+      gameData.draw_status,
+      gameData.draw_offer_by,
       gameId
     ]
   );
@@ -110,7 +114,7 @@ async updateGameState(gameId: string, gameData: ChessData): Promise<ChessData> {
             is_check = false,
             winner = NULL,
             updated_at = NOW()
-        WHERE id = $3
+        WHERE game_id = $3
         RETURNING *`,
       [startingChess.fen(), startingChess.pgn(), gameId]
     );

@@ -38,6 +38,7 @@ export function initializeSocket(server: HTTPServer) {
             userSocketMap.set(userId, socket.id);
             socketUserMap.set(socket.id, userId);
         }
+        console.log(userSocketMap)
 
         console.log("A user connected", socket.id, userSocketMap);
 

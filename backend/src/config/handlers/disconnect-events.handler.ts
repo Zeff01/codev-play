@@ -2,7 +2,10 @@ import { Server, Socket } from "socket.io";
 import { RoomManager } from "@/utils/room-manager";
 import logger from "@/utils/logger";
 import { getUserIdFromSocket,userSocketMap,socketUserMap } from "../socket-server";
-
+import {ChessService} from "@/services/chess/chess.services";
+import { GameDisconnectHandler } from "@/services/chess/chess.disconnecthandler";
+import { ChessModel } from "@/models/chess.model";
+import { ChessSocket } from "@/sockets/chess.socket";
 export function registerDisconnectEvents(
     io: Server,
     socket: Socket,
@@ -35,6 +38,15 @@ export function registerDisconnectEvents(
                 gameType: playerRoom.gameType,
                 rooms: filteredRooms,
             });
+        if (playerRoom.gameType === "chess" && playerRoom.gameId && userId) {
+            const gameDisconnect = new GameDisconnectHandler(
+                                io,
+                                new ChessService(new ChessSocket(), new ChessModel()), // <-- new ChessService(...), not bare ChessService
+                                new ChessModel(),
+                                new ChessSocket()
+            );
+            gameDisconnect.handleDisconnect(playerRoom.gameId, Number(userId));
+        }
         }
     });
 

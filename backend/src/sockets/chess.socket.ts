@@ -12,7 +12,7 @@ export class ChessSocket {
   }
 
   chessPlayerMoved(game: ChessData) {
-    this.emitToGameRoom(game.game_id, "chess:move", game);
+    this.emitToGameRoom(game.game_id, "game:move", game);
   }
 
   emitGameEnd(game: ChessData) {
