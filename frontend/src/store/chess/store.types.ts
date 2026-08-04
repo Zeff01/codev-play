@@ -21,6 +21,10 @@ export interface RoomSlice {
 export interface GameSlice {
   socket:null | any;
   setSocket: (socket: Socket) => void;
+  gameId: string | null;
+  setGameId: (gameId: string) => void;
+  showDrawModal: boolean;
+  setShowDrawModal: (show: boolean) => void;
   position: string;
   activeColor: Color;
   status: GameStatus;

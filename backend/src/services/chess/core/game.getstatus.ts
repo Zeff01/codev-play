@@ -1,5 +1,6 @@
 import { Chess } from 'chess.js';
 import { GameStatusResult, GameStatus } from '@/types/chess.type'
+import { roomManager } from '@/config/socket-server';
 
 
 export default function getGameStatus(
@@ -41,6 +42,7 @@ export default function getGameStatus(
             reason: 'checkmate',
             isDraw: false
         };
+        
     }
 
     if (engine.isDraw()) {

@@ -55,3 +55,29 @@ export interface ChessState {
   endGame: (status: GameStatus) => void;
   reset: () => void;
 }
+
+// Mirrors the backend's ChessData shape as it arrives over JSON
+// (Socket.io / REST responses) — Date fields become ISO strings once serialized.
+export interface ChessData {
+  game_id: number;
+  fen_position: string;
+  pgn_data: string;
+  current_turn: Color;
+
+  white_player_id: number;
+  black_player_id: number;
+
+  time_control: string;
+  increment?: number;
+  white_time_left: number;
+  black_time_left: number;
+
+  status: string; // or GameStatus, if the backend's status strings match 1:1
+  is_check: boolean;
+  last_move_at: string;
+  winner: "white" | "black" | null;
+
+  draw_status: "none" | "offered" | "declined" | "accepted";
+  draw_offer_by: number | null;
+  last_draw_offer_at: string | null;
+}

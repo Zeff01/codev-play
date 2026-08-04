@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useChessStore } from "@/store/chess/useChessStore";
+import { useChessGameSocket } from "@/hooks/chess/useChessGameSocket";
 import ChessBoard from "@/components/chess/ChessBoard";
 import MoveHistory from "@/components/chess/MoveHistory";
 import GameClock from "@/components/chess/GameClock";
@@ -17,7 +18,11 @@ import CapturedPieces from "@/components/chess/CapturedPieces";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
-export default function GameScreen() {
+interface Props {
+  gameId: string;
+}
+
+export default function GameScreen({ gameId }: Props) {
   const {
     position,
     activeColor,
@@ -32,10 +37,15 @@ export default function GameScreen() {
     reset,
   } = useChessStore();
 
+  // Wires the socket connection, joins the game room, and keeps the store
+  // in sync with server-authoritative moves/status.
+  useChessGameSocket(gameId);
+
   // Add this line right here!
   const material = getMaterialAdvantage(position);
 
-  const [showDrawModal, setShowDrawModal] = useState(false);
+  const { showDrawModal, setShowDrawModal } = useChessStore();
+  const [actionError, setActionError] = useState<string | null>(null);
   const orientation = playerColor ?? "w";
   const opponentColor = orientation === "w" ? "b" : "w";
 
@@ -44,12 +54,55 @@ export default function GameScreen() {
     status === "stalemate" ||
     status === "draw" ||
     status === "resigned";
-  const isBoardDisabled = isGameOver;
 
-  // TODO: uncomment when player constraints are needed
-  // const isBoardDisabled = playerColor !== null
-  //     ? activeColor !== orientation || status !== "playing"
-  //     : status !== "playing";
+ 
+  const isBoardDisabled =
+      isGameOver ||
+      (playerColor !== null
+          ? activeColor !== orientation
+          : false);
+
+  async function callChessAction(path: string) {
+    setActionError(null);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/games/chess/${gameId}/${path}`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        setActionError(data.error || "Something went wrong");
+        return null;
+      }
+      return data;
+    } catch (err) {
+      console.error(`Failed to call ${path}`, err);
+      setActionError("Network error, please try again");
+      return null;
+    }
+  }
+
+  async function handleResign() {
+    // Server response / broadcasted "chess:end" event is the source of
+    // truth for both players — no local endGame() call needed here.
+    await callChessAction("resign");
+  }
+
+  async function handleOfferDraw() {
+    setShowDrawModal(false);
+    await callChessAction("draw/offer");
+  }
+
+  async function handleAcceptDraw() {
+    await callChessAction("draw/accept");
+  }
+
+  async function handleDeclineDraw() {
+    await callChessAction("draw/reject");
+  }
 
   return (
     // Main Container: Center everything, use a column on mobile, row on large screens
@@ -77,10 +130,7 @@ export default function GameScreen() {
                   1200 ELO
                 </Badge>
               </div>
-              {/* Captured pieces placeholder */}
-
               <div className="h-4 mt-0.5 flex items-center text-muted-foreground text-xs">
-                {/* We will inject captured pieces here next */}
                 <CapturedPieces
                   capturedPieces={material[opponentColor].captured}
                   advantage={material[opponentColor].advantage}
@@ -93,7 +143,6 @@ export default function GameScreen() {
           <div className="scale-90 origin-right">
             <GameClock
               timeLeft={clocks[opponentColor]}
-              // Added the moveHistory check here!
               isActive={
                 activeColor === opponentColor &&
                 !isGameOver &&
@@ -139,9 +188,7 @@ export default function GameScreen() {
                   1200 ELO
                 </Badge>
               </div>
-              {/* Captured pieces placeholder */}
               <div className="h-4 mt-0.5 flex items-center text-muted-foreground text-xs">
-                {/* We will inject captured pieces here next */}
                 <CapturedPieces
                   capturedPieces={material[orientation].captured}
                   advantage={material[orientation].advantage}
@@ -154,7 +201,6 @@ export default function GameScreen() {
           <div className="scale-90 origin-right">
             <GameClock
               timeLeft={clocks[orientation]}
-              // Added the moveHistory check here!
               isActive={
                 activeColor === orientation &&
                 !isGameOver &&
@@ -169,11 +215,12 @@ export default function GameScreen() {
 
       {/* RIGHT COLUMN: Sidebar (Move History & Actions) */}
       <div className="flex flex-col gap-4 w-full max-w-sm xl:w-80 h-full">
-        {/* 👇 ADD GAME ALERTS HERE 👇 */}
         <div className="w-full">
           <GameAlerts status={status} activeColor={activeColor} />
+          {actionError && (
+            <p className="text-xs text-destructive mt-1">{actionError}</p>
+          )}
         </div>
-        {/* Fixed height container for move history so it doesn't stretch weirdly */}
         <div className="h-[250px] xl:h-[450px] w-full flex">
           <MoveHistory moves={moveHistory} />
         </div>
@@ -185,14 +232,14 @@ export default function GameScreen() {
               <Button
                 variant="outline"
                 className="flex-1 font-outfit font-semibold tracking-wide"
-                onClick={() => setShowDrawModal(true)}
+                onClick={handleOfferDraw}
               >
                 Offer Draw
               </Button>
               <Button
                 variant="destructive"
                 className="flex-1 font-outfit font-semibold tracking-wide"
-                onClick={() => endGame("resigned")}
+                onClick={handleResign}
               >
                 Resign
               </Button>
@@ -211,11 +258,8 @@ export default function GameScreen() {
 
       {showDrawModal && (
         <DrawOfferModal
-          onAccept={() => {
-            endGame("draw");
-            setShowDrawModal(false);
-          }}
-          onDecline={() => setShowDrawModal(false)}
+          onAccept={handleAcceptDraw}
+          onDecline={handleDeclineDraw}
         />
       )}
     </div>

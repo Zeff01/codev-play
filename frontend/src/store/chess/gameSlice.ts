@@ -21,10 +21,19 @@ export const createGameSlice: StateCreator<ChessStore, [], [], GameSlice> = (
   clocks: { w: 600, b: 600 },
   socket: null,
   setSocket: (socket) => set({ socket }),
+  gameId: null,
+  setGameId: (gameId) => {
+  if (gameId) localStorage.setItem("chess_gameId", gameId);
+  else localStorage.removeItem("chess_gameId");
+  set({ gameId });
+},
+  showDrawModal: false,
+  setShowDrawModal: (show) => set({ showDrawModal: show }),
 
   startGame: (playerColor, timeControl) => {
     chessEngine.reset();
     set({
+      gameId: get().gameId, // Keep the same gameId
       phase: "game", // This touches RoomSlice state, which is totally allowed!
       playerColor,
       position: chessEngine.fen(),
@@ -64,11 +73,11 @@ export const createGameSlice: StateCreator<ChessStore, [], [], GameSlice> = (
           { san: move.san, color: move.color as Color, moveNumber },
         ],
       });
-
-      state.socket?.emit("chess:move", {
-        gameId: state.currentRoom,
+      console.log("socket exists?", !!state.socket, "gameId:", state.gameId);
+      state.socket?.emit("game:move", {
+        gameId: state.gameId,
         gameType: "chess",
-        moveData:{from, to, promotion}
+        moveData:move
       });
 
 
@@ -105,7 +114,12 @@ export const createGameSlice: StateCreator<ChessStore, [], [], GameSlice> = (
       },
     })),
 
-  endGame: (status) => set({ status }),
+  endGame: (status) => {
+      if (typeof window !== "undefined") {
+          localStorage.removeItem("chess_gameId");
+      }
+      set({ status });
+  },
 
   reset: () => {
     chessEngine.reset();
@@ -118,7 +132,9 @@ export const createGameSlice: StateCreator<ChessStore, [], [], GameSlice> = (
       lastValidation: null,
       playerColor: null,
       clocks: { w: 600, b: 600 },
+      gameId: null,
       // Resetting Room Slice
+      showDrawModal: false,
       phase: "idle",
       rooms: [],
       currentRoom: null,

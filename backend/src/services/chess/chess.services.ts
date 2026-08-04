@@ -5,6 +5,7 @@ import { ChessMovement } from "@/services/chess/core/game.makeMove";
 import { ChessModel } from "@/models/chess.model";
 import { ChessSocket } from "@/sockets/chess.socket";
 import { Chess } from "chess.js";
+import { roomManager } from "@/config/socket-server";
 
 
 
@@ -25,7 +26,7 @@ export class ChessService extends GameService<any> {
         private chessSocket: ChessSocket,
         private chessModel = new ChessModel
     ) {
-        super(chessSocket);
+        super(chessModel);
         
     }
 
@@ -80,10 +81,12 @@ export class ChessService extends GameService<any> {
         const winner = playerId === game.white_player_id ? 'black' : 'white';
         
         const updatedGame = await this.chessModel.updateGameState(gameId, {
+            ...game,
             status: 'resigned',
             winner: winner
-        } as any);
+        });
 
+         roomManager.setGameId(gameId, "");
          this.chessSocket.emitGameEnd(updatedGame);
          return updatedGame;
 
@@ -132,7 +135,10 @@ export class ChessService extends GameService<any> {
             throw new Error("You cant accept your own offer")
         }
 
+        
         await this.chessModel.updateGameState(gameId,{...game,draw_status:"accepted",status:"draw"})
+        roomManager.setGameId(gameId, "");
+        
         this.chessSocket.chessDraw(game)
         return {message:"Game Draw"}
     }

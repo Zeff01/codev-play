@@ -10,6 +10,7 @@ import {
     useMemo,
 } from "react";
 import { io, Socket } from "socket.io-client";
+import { useAuth } from "./AuthContext";
 
 type SocketContextType = {
     socket: Socket | null;
@@ -27,17 +28,31 @@ const SocketContext = createContext<SocketContextType>({
 });
 
 export function SocketProvider({ children }: { children: ReactNode }) {
+    const user = useAuth();
     const socketRef = useRef<Socket | null>(null);
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [socketId, setSocketId] = useState<string | null>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [rooms, setRooms] = useState<any[]>([]);
-
+    
+    
     useEffect(() => {
+
+        console.log("Attempting socket connection, user:", user);
+        if (!user.user?.id) {
+            console.log("No user id yet, skipping socket connection");
+            return;
+        }
+
         socketRef.current = io(process.env.NEXT_PUBLIC_API_URL!, {
             transports: ["websocket"],
-        });
+            query:{
+                userId: user.user?.id,
+            }
+
+            
+        })
 
         const handleConnect = () => {
             setSocket(socketRef.current);
@@ -73,7 +88,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
             socketRef.current?.disconnect();
             socketRef.current = null;
         };
-    }, []);
+    }, [user.user?.id]);
 
     const contextValue = useMemo(
         () => ({ socket, socketId, isConnected, rooms }),

@@ -237,6 +237,7 @@ export function registerGameEvents(
 
     logger.info(`User ${socket.id} reconnected to game ${data.gameId} (${data.gameType})`);
   } catch (err) {
+    console.error("RECONNECT ERROR:", err);
     logger.error("Error reconnecting to game", { error: err });
     socket.emit("game:error", { message: "Failed to reconnect" });
   }

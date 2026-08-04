@@ -51,6 +51,6 @@ export function registerDisconnectEvents(
     });
 
     socket.on("error", (err) => {
-        logger.error("Socket Error", { error: err });
+        logger.error("Socket Error:", { error: err });
     });
 }
